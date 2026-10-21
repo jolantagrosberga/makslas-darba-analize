@@ -73,6 +73,9 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:
 .frame{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);box-shadow:0 14px 34px rgba(60,45,20,.28)}
 .frame canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 #ov{pointer-events:none;touch-action:none}
+.sqlab{position:absolute;inset:0;pointer-events:none}
+.sqlab span{position:absolute;transform:translate(-50%,-50%);font:700 15px/1 var(--f-body);color:var(--wall-ink);padding:3px 5px;border-radius:5px;white-space:nowrap}
+.sqlab span.on{background:#f5c33b;color:#241b00}
 #ov.on{pointer-events:auto}
 #pen{touch-action:none;pointer-events:none}
 #pen.on{pointer-events:auto;cursor:crosshair}
@@ -94,7 +97,7 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:
 .tt i{display:none;position:absolute;top:7px;right:3px;width:11px;height:11px;border-radius:50%;background:var(--cadmium);box-shadow:0 0 0 2px var(--wall-2)}
 .tt.act i{display:block}
 .tt.act{color:var(--gold-ink)}
-.tgroups .seg{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}
+.tgroups .seg{flex-wrap:wrap;gap:4px}
 .tgroups .seg>*{flex:none}
 .ctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .tb.sm{min-height:40px;padding:0 12px;font-size:.9rem}
@@ -354,7 +357,7 @@ details.sample p.scr{font-size:.8rem;color:var(--muted)}
       <div class="caption" id="caption"></div>
       <div class="area" id="area">
         <div class="frame" id="frame">
-          <canvas id="cv"></canvas>
+          <canvas id="cv"></canvas><div class="sqlab" id="sqLab" hidden></div>
           <canvas id="ov"></canvas>
           <canvas id="pen"></canvas>
         </div>
@@ -372,6 +375,7 @@ details.sample p.scr{font-size:.8rem;color:var(--muted)}
             <button class="tb on" type="button" data-view="color">Krāsains</button>
             <button class="tb" type="button" data-view="gray">Pelēktoņi</button>
             <button class="tb" type="button" data-view="temp">Siltie un vēsie</button>
+            <button class="tb" type="button" data-view="sketch">Skice</button>
           </div>
           <div class="seg" data-pane="grid" hidden>
             <button class="tb on" type="button" data-grid="none">Nav</button>
@@ -379,6 +383,8 @@ details.sample p.scr{font-size:.8rem;color:var(--muted)}
             <button class="tb" type="button" data-grid="golden">Zelta griezums</button>
             <button class="tb" type="button" data-grid="diag">Diagonāles</button>
             <button class="tb" type="button" data-grid="center">Centrs</button>
+            <button class="tb" type="button" data-grid="sq6">Lielas rūtiņas</button>
+            <button class="tb" type="button" data-grid="sq12">Mazas rūtiņas</button>
           </div>
           <div class="seg" data-pane="check" hidden>
             <button class="tb" type="button" data-toggle="mirror">Spogulis</button>
@@ -552,7 +558,7 @@ const META_KEYS=['autors','nosaukums','gads','veids','tehnika','izmers','zanrs',
 const META_LABEL={autors:'Autors',nosaukums:'Nosaukums',gads:'Gads',veids:'Mākslas veids',tehnika:'Tehnika',izmers:'Izmērs',zanrs:'Žanrs',virziens:'Virziens'};
 const blankMeta=()=>Object.fromEntries(META_KEYS.map(k=>[k,'']));
 
-const state={grade:'g1',veids:'glezn',example:null,sampleOpen:false,step:0,view:'color',mirror:false,grid:'none',weight:false,showCalc:false,more:false,dim:false,gridColor:'#ffffff',palette:false,find:-1,draw:false,pen:'#ffd400',revealed:false,mood:-1,terms:new Set(),theoryOpen:store.get('theoryOpen',true),meta:blankMeta(),isSample:true,facts:null,wpos:{x:0.5,y:0.5}};
+const state={grade:'g1',veids:'glezn',example:null,sampleOpen:false,step:0,view:'color',mirror:false,grid:'none',weight:false,showCalc:false,cell:null,more:false,dim:false,gridColor:'#ffffff',palette:false,find:-1,draw:false,pen:'#ffd400',revealed:false,mood:-1,terms:new Set(),theoryOpen:store.get('theoryOpen',true),meta:blankMeta(),isSample:true,facts:null,wpos:{x:0.5,y:0.5}};
 if(!['g1','g2','g3'].includes(state.grade))state.grade='g2';
 
 /* ---------- Terminu vārdnīca ---------- */
@@ -859,6 +865,9 @@ const work=document.createElement('canvas'), wctx=work.getContext('2d');
 const cv=$('#cv'), ctx=cv.getContext('2d'), ov=$('#ov'), octx=ov.getContext('2d'), pen=$('#pen'), pctx=pen.getContext('2d');
 let srcData=null, clusterMap=null;
 
+const SQ={sq6:6,sq12:12};
+const colName=i=>i<26?String.fromCharCode(65+i):String.fromCharCode(64+Math.floor(i/26))+String.fromCharCode(65+i%26);
+function sqGeom(w,h,N){const cell=Math.min(w,h)/N;const fit=v=>{const f=Math.floor(v/cell+1e-6),r=v/cell-f;return r>=0.4?f+1:Math.max(1,f);};return {cell,cols:fit(w),rows:fit(h)};}
 const LINES_DEF={thirds:{x:[1/3,2/3],y:[1/3,2/3]},golden:{x:[0.382,0.618],y:[0.382,0.618]},center:{x:[0.5],y:[0.5]}};
 const copyLines=()=>JSON.parse(JSON.stringify(LINES_DEF));
 let lines=copyLines();
@@ -867,7 +876,7 @@ function setImage(img,isSample){
   const MAX=1400; let w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
   const s=Math.min(1,MAX/Math.max(w,h)); w=Math.max(1,Math.round(w*s)); h=Math.max(1,Math.round(h*s));
   src.width=w; src.height=h; sctx.imageSmoothingQuality='high'; sctx.drawImage(img,0,0,w,h);
-  srcData=sctx.getImageData(0,0,w,h); clusterMap=null; tempCache=null;
+  srcData=sctx.getImageData(0,0,w,h); clusterMap=null; tempCache=null; sketchCache=null; state.cell=null;
   [cv,ov,pen,work].forEach(c=>{c.width=w;c.height=h;});
   state.isSample=!!isSample; state.find=-1; lines=copyLines(); state.wpos={x:0.5,y:0.5};
   state.facts=analyze();
@@ -876,7 +885,36 @@ function setImage(img,isSample){
 
 /* Siltie un vēsie laukumi: lielie laukumi, divi gaišuma līmeņi katrai grupai */
 const TEMPCOL={warm:[[184,72,26],[255,163,107]],cool:[[31,79,158],[127,176,245]],neu:[[90,95,110],[201,204,214]]};
-let tempCache=null;
+let tempCache=null,sketchCache=null;
+/* Skice: tikai galveno formu kontūras ar grafīta līnijām uz balta papīra (DoG metode) */
+function sketchImg(w,h){
+  if(sketchCache&&sketchCache.w===w&&sketchCache.h===h)return new ImageData(new Uint8ClampedArray(sketchCache.data),w,h);
+  const d=srcData.data,n=w*h;
+  const gi=new ImageData(w,h);for(let p=0,i=0;p<n;p++,i+=4){const v=0.2126*d[i]+0.7152*d[i+1]+0.0722*d[i+2];gi.data[i]=gi.data[i+1]=gi.data[i+2]=v;gi.data[i+3]=255;}
+  const a=document.createElement('canvas');a.width=w;a.height=h;a.getContext('2d').putImageData(gi,0,0);
+  const blurred=r=>{const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});
+    if('filter' in x){x.filter=`blur(${r}px)`;x.drawImage(a,0,0);x.filter='none';}
+    else{const t=document.createElement('canvas'),k=Math.max(1.5,r*1.3);t.width=Math.max(1,Math.round(w/k));t.height=Math.max(1,Math.round(h/k));t.getContext('2d').drawImage(a,0,0,t.width,t.height);x.imageSmoothingEnabled=true;x.drawImage(t,0,0,w,h);}
+    return x.getImageData(0,0,w,h).data;};
+  const M=Math.max(w,h);
+  /* divi slāņi: smalkās līnijas (detaļas) un biezās līnijas (galvenās formas) */
+  const layer=(sg,k2,pct,pctTop)=>{const A=blurred(sg),B=blurred(sg*k2),r=new Float32Array(n);
+    for(let p=0,i=0;p<n;p++,i+=4){const dd=A[i]-B[i];r[p]=dd<0?-dd:0;}
+    const smp=[];for(let p=0;p<n;p+=5)smp.push(r[p]);smp.sort((x,y)=>x-y);
+    const t=Math.max(2,smp[Math.floor(smp.length*pct)]),top=Math.max(t+3,smp[Math.floor(smp.length*pctTop)]);
+    for(let p=0;p<n;p++){let k=(r[p]-t)/(top-t);r[p]=k<=0?0:k>=1?1:k;}return r;};
+  const fine=layer(Math.max(1.2,M/520),1.8,0.885,0.97);
+  const bold=layer(Math.max(2.2,M/240),2.0,0.915,0.98);
+  const o=new ImageData(w,h),od=o.data;let seed=11;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+  for(let p=0,i=0;p<n;p++,i+=4){
+    const kf=Math.pow(fine[p],0.45),kb=Math.pow(bold[p],0.4);
+    const k=Math.max(kf*0.95,kb);
+    const paper=251-rnd()*5;const lead=(kb>kf?18:30)+rnd()*22;
+    const v=paper*(1-k)+lead*k;
+    od[i]=v;od[i+1]=v;od[i+2]=v+2*(1-k);od[i+3]=255;
+  }
+  sketchCache={w,h,data:new Uint8ClampedArray(od)};return o;
+}
 function tempAreas(w,h){
   if(tempCache&&tempCache.w===w&&tempCache.h===h)return new ImageData(new Uint8ClampedArray(tempCache.data),w,h);
   const S=Math.min(1,110/Math.max(w,h)),sw=Math.max(8,Math.round(w*S)),sh=Math.max(8,Math.round(h*S));
@@ -900,6 +938,7 @@ function render(){
   if(!srcData)return;
   const w=src.width,h=src.height; let out;
   if(state.view==='temp'){ out=tempAreas(w,h); }
+  else if(state.view==='sketch'){ out=sketchImg(w,h); }
   else {
     out=new ImageData(new Uint8ClampedArray(srcData.data),w,h);
     if(state.view==='gray'){
@@ -932,11 +971,14 @@ function ensureClusterMap(){
 
 /* ---------- Pārklājums: režģis un svara centrs ---------- */
 let drag=null;
+const SQ_GUT=34; let sqGutOn=false;
 function drawOverlay(){
   const w=ov.width,h=ov.height; octx.clearRect(0,0,w,h); if(!w)return;
+  const wantGut=!!SQ[state.grid]; if(wantGut!==sqGutOn){sqGutOn=wantGut;fit();}
+  if(!wantGut){sqLab.hidden=true;sqLab.innerHTML='';}
   const lw=Math.max(3,Math.round(Math.max(w,h)/300));
   const gc=state.gridColor, outline=gc==='#111111'?'rgba(255,255,255,.8)':'rgba(0,0,0,.7)';
-  if(state.dim&&(lines[state.grid]||state.grid==='diag'||state.weight)){octx.fillStyle='rgba(0,0,0,.5)';octx.fillRect(0,0,w,h);}
+  if(state.dim&&(lines[state.grid]||SQ[state.grid]||state.grid==='diag'||state.weight)){octx.fillStyle='rgba(0,0,0,.5)';octx.fillRect(0,0,w,h);}
   const stroke=(fn,color,dash)=>{octx.lineCap='round';octx.setLineDash(dash||[]);octx.strokeStyle=outline;octx.lineWidth=lw*2.6;octx.beginPath();fn();octx.stroke();octx.strokeStyle=color||gc;octx.lineWidth=lw;octx.beginPath();fn();octx.stroke();octx.setLineDash([]);};
   const L=(x1,y1,x2,y2)=>{octx.moveTo(x1,y1);octx.lineTo(x2,y2);};
   const label=(txt,x,y)=>{const fs=Math.round(Math.max(w,h)/48);octx.font=`700 ${fs}px "JetBrains Mono",monospace`;const tw=octx.measureText(txt).width;
@@ -953,6 +995,26 @@ function drawOverlay(){
     }
   } else if(g==='diag'){
     stroke(()=>{L(0,0,w,h);L(w,0,0,h);});
+  } else if(SQ[g]){
+    const {cell,cols,rows}=sqGeom(w,h,SQ[g]);
+    const sel=state.cell&&state.cell.g===g?state.cell:null;
+    if(sel){octx.fillStyle='rgba(0,0,0,.62)';octx.beginPath();octx.rect(0,0,w,h);octx.rect(sel.c*cell,sel.r*cell,sel.c===cols-1?w-sel.c*cell:cell,sel.r===rows-1?h-sel.r*cell:cell);octx.fill('evenodd');}
+    const thin=Math.max(2,lw*0.7);
+    octx.lineCap='butt';octx.strokeStyle=outline;octx.lineWidth=thin*2.4;octx.beginPath();
+    for(let i=1;i<cols;i++)L(i*cell,0,i*cell,h);for(let j=1;j<rows;j++)L(0,j*cell,w,j*cell);octx.stroke();
+    octx.strokeStyle=gc;octx.lineWidth=thin;octx.beginPath();
+    for(let i=1;i<cols;i++)L(i*cell,0,i*cell,h);for(let j=1;j<rows;j++)L(0,j*cell,w,j*cell);octx.stroke();
+    if(sel){octx.strokeStyle='#f5c33b';octx.lineWidth=lw*1.6;{const sw=sel.c===cols-1?w-sel.c*cell:cell,sh=sel.r===rows-1?h-sel.r*cell:cell;octx.strokeRect(sel.c*cell+lw*0.8,sel.r*cell+lw*0.8,sw-lw*1.6,sh-lw*1.6);}}
+    const fs=Math.round(Math.max(12,Math.min(cell*0.3,Math.max(w,h)/42)));
+    octx.font=`700 ${fs}px "Figtree",system-ui,sans-serif`;octx.textAlign='center';octx.textBaseline='middle';
+    const tag=(txt,cx,cy,on,maxw)=>{let f=fs;octx.font=`700 ${f}px "Figtree",system-ui,sans-serif`;if(maxw){while(f>9&&octx.measureText(txt).width+f*0.6>maxw){f--;octx.font=`700 ${f}px "Figtree",system-ui,sans-serif`;}}const tw=octx.measureText(txt).width+f*0.6,th=f*1.25;octx.fillStyle=on?'#f5c33b':'rgba(255,255,255,.88)';octx.fillRect(cx-tw/2,cy-th/2,tw,th);octx.fillStyle=on?'#241b00':'#1a1d27';octx.fillText(txt,cx,cy+1);};
+    { /* marķējums ārpus attēla: burti virs augšmalas, cipari pie kreisās malas */
+      const G=SQ_GUT,fw=frame.clientWidth,fh=frame.clientHeight;let html='';
+      for(let i=0;i<cols;i++){const cw=i===cols-1?w-i*cell:cell;html+=`<span class="${sel&&sel.c===i?'on':''}" style="left:${(i*cell+cw/2)/w*fw}px;top:${-G/2}px">${colName(i)}</span>`;}
+      for(let j=0;j<rows;j++){const ch=j===rows-1?h-j*cell:cell;html+=`<span class="${sel&&sel.r===j?'on':''}" style="left:${-G/2}px;top:${(j*cell+ch/2)/h*fh}px">${j+1}</span>`;}
+      sqLab.innerHTML=html;sqLab.hidden=false;
+    }
+    octx.textAlign='start';octx.textBaseline='alphabetic';
   }
   if(state.weight){
     const r=lw*11;
@@ -985,7 +1047,14 @@ function applyDrag(px,py){
   drawOverlay();
 }
 ov.addEventListener('pointerdown',e=>{
-  const [px,py,k]=ovPos(e);drag=hitTest(px,py,k);
+  const [px,py,k]=ovPos(e);
+  if(SQ[state.grid]&&!(state.weight&&hitTest(px,py,k))&&!state.weight){
+    const {cell,cols,rows}=sqGeom(ov.width,ov.height,SQ[state.grid]);
+    const c=clamp(Math.floor(px/cell),0,cols-1),r=clamp(Math.floor(py/cell),0,rows-1);
+    state.cell=(state.cell&&state.cell.g===state.grid&&state.cell.c===c&&state.cell.r===r)?null:{g:state.grid,c,r};
+    e.preventDefault();drawOverlay();return;
+  }
+  drag=hitTest(px,py,k);
   if(!drag&&state.weight)drag={t:'w'};
   if(!drag)return;
   e.preventDefault();try{ov.setPointerCapture(e.pointerId);}catch(_){}
@@ -995,10 +1064,10 @@ ov.addEventListener('pointermove',e=>{
   const [px,py,k]=ovPos(e);
   if(drag){applyDrag(px,py);return;}
   const hit=hitTest(px,py,k);
-  ov.style.cursor=!hit?(state.weight?'copy':'default'):hit.t==='w'?'grab':(hit.bx>=0&&hit.by>=0)?'move':hit.bx>=0?'ew-resize':'ns-resize';
+  ov.style.cursor=!hit?(state.weight?'copy':SQ[state.grid]?'pointer':'default'):hit.t==='w'?'grab':(hit.bx>=0&&hit.by>=0)?'move':hit.bx>=0?'ew-resize':'ns-resize';
 });
 ['pointerup','pointercancel'].forEach(t=>ov.addEventListener(t,()=>{if(drag){drag=null;drawOverlay();}}));
-$('#gridReset').addEventListener('click',()=>{lines=copyLines();state.wpos={x:0.5,y:0.5};drawOverlay();});
+$('#gridReset').addEventListener('click',()=>{lines=copyLines();state.wpos={x:0.5,y:0.5};state.cell=null;drawOverlay();});
 
 let lastCtx='';
 function updateHint(){
@@ -1008,26 +1077,31 @@ function updateHint(){
   else if(state.find>=0&&f&&f.palette[state.find]){const c=f.palette[state.find];t=`<span class="lg"><i style="background:${c.hex}"></i><b>${esc(c.name)}</b></span><span>Izgaismotas vietas, kur ir šī un līdzīgas krāsas (${Math.round(c.share*100)} % attēla). Spied vēlreiz, lai atgrieztos.</span>`;}
   else if(state.draw)t='Zīmē ar pirkstu vai peli. „Notīrīt” izdzēš zīmējumu.';
   else if(state.weight)t=state.showCalc?'Dzeltenais marķieris ir jūsu minējums. Baltais punktētais aplis rāda, kur svara centru aprēķināja rīks. Salīdziniet!':'Pavelc dzelteno marķieri uz vietu, kas vizuāli „sver” visvairāk un pirmā piesaista skatienu.';
+  else if(SQ[state.grid]){const c=state.cell&&state.cell.g===state.grid?state.cell:null;
+    t=c?`<span><b>Izcelta rūtiņa: ${colName(c.c)}${c.r+1}.</b> Uzspied uz citas rūtiņas, lai izceltu to. Uzspied vēlreiz uz tās pašas, lai atceltu izcelšanu.</span>`:'<span><b>Rūtiņas kopijas veidošanai.</b> Pārzīmē attēlu pa vienai rūtiņai uz rūtiņu papīra. Uzspied uz rūtiņas, lai to izceltu, piemēram, C4.</span>';}
   else if(lines[state.grid])t='Režģa līnijas var pavilkt. Krustpunkts pārvieto abas līnijas. Ja līnijas slikti redz, maini to krāsu vai ieslēdz „Patumšināt”.';
   else if(state.view==='temp'&&f){const T=f.temp,c=TEMPCOL;const rgb=a=>`rgb(${a.join(',')})`;
     t=`<span class="lg"><i style="background:${rgb(c.warm[1])}"></i>siltie ${Math.round(T.warm)} %</span><span class="lg"><i style="background:${rgb(c.cool[1])}"></i>vēsie ${Math.round(T.cool)} %</span><span class="lg"><i style="background:${rgb(c.neu[1])}"></i>neitrālie ${Math.round(T.neu)} %</span><span class="muted2">Gaišāks tonis: gaišas vietas, tumšāks: tumšas vietas.</span>`;}
+  else if(state.view==='sketch')t='<span><b>Skice.</b> Paliek tikai galveno formu kontūras, kā zīmētas ar grafīta zīmuli uz balta papīra. Tā vieglāk saskatīt kompozīcijas uzbūvi un formas bez krāsām un sīkām detaļām.</span>';
   else if(state.view==='gray')t='Pelēktoņos redz tikai gaismu un ēnu. Kur ir gaišākā un tumšākā vieta?';
-  const ctxKey=[state.grid!=='none',state.weight,state.palette,state.find>=0,state.draw,state.view].join();
+  const ctxKey=[state.grid,state.cell?1:0,state.weight,state.palette,state.find>=0,state.draw,state.view].join();
   if(ctxKey!==lastCtx){lastCtx=ctxKey;const ii=document.querySelector('.info-in');if(ii)ii.scrollTop=0;}
   if(!t)t='<span class="muted2">Izvēlies rīku. Šeit parādīsies tā skaidrojums.</span>';
   hint.innerHTML=t;
 }
 
 /* ---------- Ietilpināšana ---------- */
-const area=$('#area'), frame=$('#frame');
+const area=$('#area'), frame=$('#frame'), sqLab=$('#sqLab');
 let fitRaf=0;
 function fit(){
   if(!src.width)return;
-  const pad=20, aw=area.clientWidth-pad*2, ah=area.clientHeight-pad*2; if(aw<=0||ah<=0)return;
+  const pad=20, gut=sqGutOn?SQ_GUT:0, aw=area.clientWidth-pad*2-gut, ah=area.clientHeight-pad*2-gut; if(aw<=0||ah<=0)return;
   const s=Math.min(aw/src.width,ah/src.height);
   const fw=Math.floor(src.width*s)+'px', fh=Math.floor(src.height*s)+'px';
   if(frame.style.width!==fw)frame.style.width=fw;
   if(frame.style.height!==fh)frame.style.height=fh;
+  const m=(gut/2)+'px'; if(frame.style.marginLeft!==m){frame.style.marginLeft=m;frame.style.marginTop=m;}
+  if(sqGutOn)requestAnimationFrame(drawOverlay);
 }
 const scheduleFit=()=>{cancelAnimationFrame(fitRaf);fitRaf=requestAnimationFrame(fit);};
 if('ResizeObserver' in window) new ResizeObserver(scheduleFit).observe(area);
@@ -1255,12 +1329,12 @@ function syncToolbar(){
   const act={view:state.view!=='color',grid:state.grid!=='none',check:state.mirror||state.weight||state.palette,draw:state.draw};
   $$('[data-tab]').forEach(t=>t.classList.toggle('act',!!act[t.dataset.tab]));
   pen.classList.toggle('on',state.draw);
-  ov.classList.toggle('on',!state.draw&&(state.weight||!!lines[state.grid]));
+  ov.classList.toggle('on',!state.draw&&(state.weight||!!lines[state.grid]||!!SQ[state.grid]));
   $('#strip').hidden=!state.palette;
   refreshChips(); updateHint();
 }
 function setView(v){state.view=v;render();syncToolbar();}
-function setGrid(g){state.grid=g;drawOverlay();syncToolbar();}
+function setGrid(g){state.grid=g;state.cell=null;drawOverlay();syncToolbar();}
 function toggle(k){
   state[k]=!state[k];
   if(k==='mirror')render();
@@ -1649,7 +1723,7 @@ function camera(k){ // k: 0 = slīpais skats, 1 = skats no augšas
 
 /* ---------- Kadrs ---------- */
 let last=-1,shown=false,frozen=0;
-const LOOP_WAIT=5; // sekundes, cik ilgi virsraksts redzams pirms efekta atkārtošanas
+const LOOP_WAIT=7; // sekundes, cik ilgi virsraksts redzams pirms efekta atkārtošanas
 const credit=document.getElementById('introCredit');
 function frame(now){
   if(!running)return;
