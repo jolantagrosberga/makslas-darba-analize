@@ -71,6 +71,16 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:
 .caption .load{margin-left:auto;min-height:40px;padding:0 14px;border-radius:10px;border:0;background:var(--cadmium);color:var(--cadmium-ink);font-weight:700;cursor:pointer}
 .area{position:relative;min-height:0;min-width:0;overflow:hidden}
 .frame{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);box-shadow:0 14px 34px rgba(60,45,20,.28)}
+.zoombtn{position:absolute;top:10px;right:10px;z-index:3;display:flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--wall-line);background:rgba(255,255,255,.92);color:var(--wall-ink);font:700 .9rem var(--f-body);cursor:pointer;box-shadow:0 4px 12px rgba(60,45,20,.18)}
+.zoombtn:hover{background:#fff}
+.zoombtn svg{width:18px;height:18px}
+.area.zoom{position:fixed;inset:0;z-index:60;background:rgba(18,15,10,.72);animation:zoomIn .22s ease-out}
+.area.zoom .frame{box-shadow:0 24px 70px rgba(0,0,0,.6)}
+.area.zoom .sqlab span{color:#fff;background:rgba(10,11,16,.85);min-width:1.6em;text-align:center}
+.area.zoom .sqlab span.on{color:#241b00;background:#f5c33b}
+.area.zoom .zoombtn{top:16px;right:16px;min-height:48px;font-size:1rem}
+@keyframes zoomIn{from{background:rgba(18,15,10,0)}to{background:rgba(18,15,10,.72)}}
+@media (prefers-reduced-motion:reduce){.area.zoom{animation:none}}
 .frame canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 #ov{pointer-events:none;touch-action:none}
 .sqlab{position:absolute;inset:0;pointer-events:none}
@@ -362,6 +372,7 @@ details.sample p.scr{font-size:.8rem;color:var(--muted)}
           <canvas id="pen"></canvas>
         </div>
         <div class="drop" id="drop" hidden>Atlaid attēlu šeit</div>
+        <button class="zoombtn" id="zoomBtn" type="button" aria-pressed="false" title="Palielināt attēlu visā ekrānā (Esc – atpakaļ)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg><span>Palielināt</span></button>
       </div>
       <div class="tools">
         <div class="tgroups">
@@ -1107,6 +1118,15 @@ const scheduleFit=()=>{cancelAnimationFrame(fitRaf);fitRaf=requestAnimationFrame
 if('ResizeObserver' in window) new ResizeObserver(scheduleFit).observe(area);
 window.addEventListener('resize',scheduleFit);
 
+
+/* ---------- Attēla palielināšana visā ekrānā ---------- */
+{const zb=$('#zoomBtn'),ICI=zb.querySelector('svg').outerHTML,ICO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg>';
+ const setZoom=on=>{area.classList.toggle('zoom',on);zb.setAttribute('aria-pressed',on);zb.innerHTML=(on?ICO:ICI)+'<span>'+(on?'Samazināt':'Palielināt')+'</span>';zb.title=on?'Atgriezties parastajā skatā (Esc)':'Palielināt attēlu visā ekrānā (Esc – atpakaļ)';fit();requestAnimationFrame(()=>{fit();drawOverlay();});};
+ zb.addEventListener('click',()=>setZoom(!area.classList.contains('zoom')));
+ area.addEventListener('click',e=>{if(e.target===area&&area.classList.contains('zoom'))setZoom(false);});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&area.classList.contains('zoom')){e.preventDefault();setZoom(false);}});
+ window.closeZoom=()=>{if(area.classList.contains('zoom'))setZoom(false);};
+}
 /* ---------- Zīmēšana ---------- */
 let drawing=false,last=null;
 function penPos(e){const r=pen.getBoundingClientRect();return [(e.clientX-r.left)*pen.width/r.width,(e.clientY-r.top)*pen.height/r.height];}
@@ -1398,7 +1418,7 @@ $('#hideRight').addEventListener('click',()=>togRight(false));
 $('#btnRight').addEventListener('click',()=>togRight(true));
 if(store.get('right',true)===false)togRight(false);
 $('#btnLinks').addEventListener('click',()=>openSheet('shLinks'));
-{const hb=$('#homeBtn');const goHome=()=>{closeSheets();if(window.openIntro)window.openIntro();};hb.addEventListener('click',goHome);hb.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();goHome();}});}
+{const hb=$('#homeBtn');const goHome=()=>{closeSheets();if(window.closeZoom)window.closeZoom();if(window.openIntro)window.openIntro();};hb.addEventListener('click',goHome);hb.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();goHome();}});}
 $('#btnEx').addEventListener('click',()=>openSheet('shEx'));
 const EXIMG=JSON.parse(document.getElementById('exData').textContent);
 $('#excards').innerHTML=EXAMPLES.map(e=>`<button type="button" class="excard" data-ex="${e.id}"><img src="${EXIMG[e.id].thumb}" alt=""><span class="exk">${esc(e.short)}</span><b>${esc(e.title)}</b><span class="exa">${esc(e.meta.autors)}, ${esc(e.meta.gads)}</span></button>`).join('');
