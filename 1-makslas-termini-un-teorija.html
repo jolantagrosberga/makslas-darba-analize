@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mākslas termini un teorija</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Izkārtojums: tumša "galerijas siena" ar mākslas darbu kreisajā pusē, skolotāja vadības panelis labajā pusē. Optimizēts interaktīvajai tāfelei. */
+:root{
+  color-scheme:light;
+  --paper:#eceef5; --surface:#ffffff; --surface-2:#f5f6fb; --ink:#141830; --muted:#565d82; --line:#d7dbea;
+  --accent:#2b3fd4; --accent-ink:#ffffff; --accent-soft:#e3e6ff; --cadmium:#f2b705; --cadmium-ink:#241b00;
+  --wall:#f4efe5; --wall-2:#ebe3d4; --wall-line:#d8cdb8; --wall-ink:#2b2518; --wall-muted:#6c6352; --gold-ink:#8a5f00;
+  --warm:#e2703a; --cool:#3d7ed8; --neutral:#9aa0b4;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --r:16px;
+  --frame-bg:#c9cddb;
+}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;overflow-x:hidden}
+*{box-sizing:border-box}
+button,input,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.stage :focus-visible{outline-color:var(--accent)}
+
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr);grid-template-columns:minmax(0,1fr);gap:12px;padding-block:12px;padding-inline:16px}
+/* 16:9 darba laukums 1600×900, ko mērogo līdzi ekrānam */
+@media (min-width:761px){
+  html,body{height:100%;overflow:hidden}
+  body{background:var(--frame-bg)}
+  .app{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform:translate(-50%,-50%) scale(var(--s,1));transform-origin:center;background:var(--paper);container-type:size}
+}
+
+/* Galvene */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.brand{display:flex;align-items:center;gap:12px;min-width:0;cursor:pointer;border-radius:12px}
+.brand:hover h1{color:var(--accent)}
+.brand:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+.mark{width:44px;height:44px;border-radius:12px;background:var(--accent);display:grid;place-items:center;flex:none}
+.mark svg{width:26px;height:26px}
+.brand h1{font-size:1.35rem;font-weight:800;line-height:1.1}
+.brand p{margin:0;color:var(--muted);font-size:.85rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.brand .author{font-size:.9rem;color:var(--muted);margin-top:2px}
+.brand .author b{color:var(--ink);font-weight:700}
+.top-actions{display:flex;flex-wrap:wrap;gap:8px}
+
+.btn{min-height:46px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:background .15s,border-color .15s}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.ai{background:var(--cadmium);color:var(--cadmium-ink);border-color:var(--cadmium)}
+.btn.icon{width:46px;padding:0;justify-content:center}
+.btn svg{width:20px;height:20px;flex:none}
+
+/* Galvenais laukums */
+.main{display:grid;grid-template-columns:minmax(250px,24%) minmax(0,1fr) minmax(270px,22%);gap:12px;min-height:0;min-width:0}
+.main.noright{grid-template-columns:minmax(250px,24%) minmax(0,1fr)}
+.main.noright .right{display:none}
+
+/* Skatuve */
+.stage{background:var(--wall);color:var(--wall-ink);border-radius:var(--r);display:grid;grid-template-rows:auto minmax(0,1fr) auto;grid-template-columns:minmax(0,1fr);min-height:0;min-width:0;overflow:hidden}
+.caption{padding:10px 16px;font-size:.95rem;color:var(--wall-muted);border-bottom:1px solid var(--wall-line);display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-width:0}
+.caption b{color:var(--wall-ink);font-weight:600}
+.caption .tag{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:6px;background:var(--wall-2);color:var(--gold-ink)}
+.caption .load{margin-left:auto;min-height:40px;padding:0 14px;border-radius:10px;border:0;background:var(--cadmium);color:var(--cadmium-ink);font-weight:700;cursor:pointer}
+.area{position:relative;min-height:0;min-width:0;overflow:hidden}
+.frame{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);box-shadow:0 14px 34px rgba(60,45,20,.28)}
+.zoombtn{position:absolute;top:10px;right:10px;z-index:3;display:flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--wall-line);background:rgba(255,255,255,.92);color:var(--wall-ink);font:700 .9rem var(--f-body);cursor:pointer;box-shadow:0 4px 12px rgba(60,45,20,.18)}
+.zoombtn:hover{background:#fff}
+.zoombtn svg{width:18px;height:18px}
+.area.zoom{position:fixed;inset:0;z-index:60;background:rgba(18,15,10,.72);animation:zoomIn .22s ease-out}
+.area.zoom .frame{box-shadow:0 24px 70px rgba(0,0,0,.6)}
+.area.zoom .sqlab span{color:#fff;background:rgba(10,11,16,.85);min-width:1.6em;text-align:center}
+.area.zoom .sqlab span.on{color:#241b00;background:#f5c33b}
+.area.zoom .zoombtn{top:16px;right:16px;min-height:48px;font-size:1rem}
+@keyframes zoomIn{from{background:rgba(18,15,10,0)}to{background:rgba(18,15,10,.72)}}
+@media (prefers-reduced-motion:reduce){.area.zoom{animation:none}}
+.frame canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#ov{pointer-events:none;touch-action:none}
+.sqlab{position:absolute;inset:0;pointer-events:none}
+.sqlab span{position:absolute;transform:translate(-50%,-50%);font:700 15px/1 var(--f-body);color:var(--wall-ink);padding:3px 5px;border-radius:5px;white-space:nowrap}
+.sqlab span.on{background:#f5c33b;color:#241b00}
+#ov.on{pointer-events:auto}
+#pen{touch-action:none;pointer-events:none}
+#pen.on{pointer-events:auto;cursor:crosshair}
+.drop{position:absolute;inset:12px;border:3px dashed var(--cadmium);border-radius:14px;display:grid;place-items:center;font-family:var(--f-display);font-size:1.6rem;background:rgba(10,11,16,.8);color:#fff;z-index:2}
+.gc{width:40px;height:40px;border-radius:50%;border:2px solid #b9ad95;cursor:pointer;padding:0;align-self:center}
+.gc.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--wall)}
+
+.strip{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--wall-line);overflow-x:auto}
+.sw{flex:none;display:flex;align-items:center;gap:8px;min-height:46px;padding:4px 12px 4px 4px;border-radius:12px;border:2px solid var(--wall-line);background:var(--wall-2);color:var(--wall-ink);cursor:pointer;font-size:.9rem;text-align:left}
+.sw i{width:36px;height:36px;border-radius:9px;flex:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+.sw small{font-family:var(--f-mono);color:var(--wall-muted);font-size:.75rem}
+.sw.on{border-color:var(--cadmium)}
+
+.tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(200px,30%);gap:12px 14px;padding:12px 16px 14px;border-top:1px solid var(--wall-line);background:var(--wall-2)}
+.tgroups{display:flex;flex-direction:column;gap:8px;min-width:0}
+.ttabs{display:flex;flex-wrap:wrap;gap:2px;border-bottom:1px solid var(--wall-line)}
+.tt{position:relative;min-height:44px;padding:0 14px;border:0;border-bottom:3px solid transparent;background:transparent;color:var(--wall-muted);font-weight:700;font-size:.9rem;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;margin-bottom:-1px}
+.tt.on{color:var(--wall-ink);border-bottom-color:var(--cadmium)}
+.tt i{display:none;position:absolute;top:7px;right:3px;width:11px;height:11px;border-radius:50%;background:var(--cadmium);box-shadow:0 0 0 2px var(--wall-2)}
+.tt.act i{display:block}
+.tt.act{color:var(--gold-ink)}
+.tgroups .seg{flex-wrap:wrap;gap:4px}
+.tgroups .seg>*{flex:none}
+.ctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.tb.sm{min-height:40px;padding:0 12px;font-size:.9rem}
+.info{position:relative;height:clamp(140px,17vh,190px);height:clamp(140px,17cqh,190px);background:#fffdf8;border:1px solid var(--wall-line);border-radius:12px}
+.info-in{position:absolute;inset:0;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:10px;font-size:1rem;line-height:1.4;color:var(--wall-ink)}
+#hint{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+#hint .muted2{color:var(--wall-muted)}
+#hint .lg{display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
+#hint .lg i{width:16px;height:16px;border-radius:4px;display:inline-block}
+.pal2{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:4px}
+.pal2 .sw{flex-direction:column;justify-content:center;align-items:center;min-height:0;padding:4px 2px;gap:2px;border-width:2px;font-size:.8rem}
+.pal2 .sw i{width:30px;height:30px;border-radius:7px}
+.tg{display:flex;flex-direction:column;gap:6px;min-width:0}
+.tg>span{font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--wall-muted);font-weight:700}
+.seg{display:flex;flex-wrap:wrap;gap:4px}
+.tb{min-height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--wall-line);background:#fffdf8;color:var(--wall-ink);font-weight:600;font-size:.95rem;cursor:pointer}
+.tb:hover{border-color:var(--wall-muted)}
+.tb.on{background:var(--cadmium);color:var(--cadmium-ink);border-color:var(--cadmium)}
+.tb.ghost{background:transparent;color:var(--wall-muted)}
+.pc{width:44px;height:44px;border-radius:10px;border:2px solid #b9ad95;cursor:pointer;padding:0}
+.pc.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--wall)}
+
+/* Panelis */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
+.grade{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:8px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.gb{border:2px solid transparent;border-radius:12px;padding:6px 8px;min-height:48px;background:transparent;cursor:pointer;text-align:center;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.gb b{font-family:var(--f-display);font-size:1.25rem;font-weight:800;line-height:1.1}
+.gb small{display:none}
+.gb:hover{border-color:var(--line)}
+.gb.on{background:var(--surface);border-color:var(--accent)}
+.gb.on b{color:var(--accent)}
+
+.steps{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;border-bottom:1px solid var(--line)}
+.st{flex:1 1 0;max-width:52px;min-width:38px;display:grid;place-items:center;height:44px;padding:0;border-radius:22px;border:2px solid var(--line);background:var(--surface);cursor:pointer;font-weight:700}
+.st .stt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.st em{font-style:normal;font-family:var(--f-mono);font-size:1rem;background:none;width:auto;height:auto}
+.st.on{border-color:var(--accent);color:var(--accent)}
+.st.on{background:var(--accent);border-color:var(--accent)}
+.st.on em{color:var(--accent-ink)}
+.st.done{background:var(--accent-soft);border-color:var(--accent-soft)}
+.st.done em{color:var(--accent)}
+
+.card,.qcard{flex:1;overflow-y:auto;padding:16px 18px 18px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.rhead{padding:12px 18px;border-bottom:1px solid var(--line);background:var(--surface-2);font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.eyebrow{font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.qcard h2{font-size:clamp(1.6rem,3.4vh,3rem);font-size:clamp(1.6rem,3.4cqh,3rem);font-weight:800;line-height:1.1;margin-top:2px}
+.qs{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;counter-reset:q}
+.qs li{counter-increment:q;display:grid;grid-template-columns:auto 1fr;gap:12px;font-size:clamp(1.15rem,2.6vh,2.2rem);font-size:clamp(1.15rem,2.6cqh,2.2rem);line-height:1.35;font-weight:500}
+.qs li::before{content:counter(q);min-width:1.6em;height:1.6em;border-radius:.35em;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-family:var(--f-mono);font-size:.7em;margin-top:.15em}
+.qs li.core::before{content:"★";background:var(--cadmium);color:var(--cadmium-ink)}
+.more{align-self:flex-start;min-height:44px;padding:0 16px;border-radius:12px;border:2px dashed var(--accent);background:transparent;color:var(--accent);font-weight:700;cursor:pointer;font-size:1rem}
+.qs.extra li{font-size:clamp(1rem,2.1vh,1.7rem);font-size:clamp(1rem,2.1cqh,1.7rem);color:var(--muted)}
+.moods{display:flex;flex-wrap:wrap;gap:8px}
+.mood{min-height:52px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface-2);cursor:pointer;font-size:1rem;font-weight:600;display:flex;align-items:center;gap:8px}
+.mood span{font-size:1.5rem}
+.mood.on{border-color:var(--accent);background:var(--accent-soft)}
+.sub{font-size:.75rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:600;font-size:.95rem}
+.chip.on{background:var(--cadmium);border-color:var(--cadmium);color:var(--cadmium-ink)}
+.chip.term{border-style:dashed}
+.chip.term.on{background:var(--accent-soft);border-color:var(--accent);border-style:solid;color:var(--accent)}
+.defs{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.def{background:var(--accent-soft);border-radius:10px;padding:10px 12px;font-size:.98rem}
+.def b{color:var(--accent)}
+details.theory{border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+details.theory summary{cursor:pointer;padding:10px 14px;font-weight:700;list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:46px}
+details.theory summary::-webkit-details-marker{display:none}
+details.theory summary::after{content:"+";font-family:var(--f-mono);color:var(--accent);font-size:1.2rem}
+details.theory[open] summary::after{content:"–"}
+details.theory p{margin:0;padding:0 14px 12px;font-size:1rem}
+.tip{background:var(--surface-2);border-radius:12px;padding:12px 14px;font-size:.95rem;color:var(--muted)}
+.tip b{color:var(--ink)}
+.metabox{border:1px dashed var(--line);border-radius:12px;padding:10px 14px;font-size:.95rem}
+.metabox dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:2px 12px}
+.metabox dt{color:var(--muted)}
+.metabox dd{margin:0;font-weight:600;min-width:0;overflow-wrap:anywhere}
+.linkbtn{background:none;border:0;padding:10px 4px;color:var(--accent);font-weight:700;cursor:pointer;text-decoration:underline}
+
+.reveal{width:100%;min-height:52px;border-radius:12px;border:2px dashed var(--accent);background:transparent;color:var(--accent);font-weight:700;cursor:pointer;font-size:1rem}
+.facts{display:flex;flex-direction:column;gap:10px}
+.fact{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.fact h3{font-family:var(--f-body);font-size:.75rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.fact p{margin:0;font-size:1.02rem}
+.fact .note{font-size:.82rem;color:var(--muted)}
+.pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px}
+.pal button{display:flex;align-items:center;gap:8px;padding:4px;border-radius:10px;border:2px solid var(--line);background:var(--surface);cursor:pointer;text-align:left;min-width:0}
+.pal button.on{border-color:var(--accent)}
+.pal i{width:34px;height:34px;border-radius:8px;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.pal span{font-size:.82rem;line-height:1.2;min-width:0}
+.pal small{display:block;font-family:var(--f-mono);color:var(--muted);font-size:.72rem}
+.bar{display:flex;height:16px;border-radius:8px;overflow:hidden;background:var(--surface-2)}
+.bar div{height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;font-variant-numeric:tabular-nums}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+.hist{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;align-items:end;height:70px;padding:4px;border-radius:8px;background:var(--surface-2)}
+.hist div{border-radius:3px 3px 0 0;min-height:2px;box-shadow:inset 0 0 0 1px rgba(127,127,127,.35)}
+.hl{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted)}
+
+.nav{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+.nav .btn{flex:1;justify-content:center}
+.nav .btn:disabled{opacity:.4;cursor:default}
+
+/* Logi */
+.sheet{position:fixed;inset:0;background:rgba(8,10,20,.55);display:grid;place-items:center;padding:16px;z-index:20}
+.sheet-in{background:var(--surface);color:var(--ink);border-radius:18px;width:min(700px,100%);max-height:calc(100% - 16px);overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:16px;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+.sheet-in.wide{width:min(900px,100%)}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.sheet-head h2{font-size:1.5rem;font-weight:800}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;font-weight:600;color:var(--muted);min-width:0}
+.form label.wide{grid-column:1/-1}
+.form input{min-height:46px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);padding:0 12px;font-size:1rem;color:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.switch{display:flex;align-items:flex-start;gap:14px;padding:14px;border:1px solid var(--line);border-radius:12px;cursor:pointer}
+.switch input{width:26px;height:26px;accent-color:var(--accent);flex:none;margin-top:2px}
+.switch b{display:block}
+.switch span{color:var(--muted);font-size:.93rem}
+.prose{font-size:.98rem}
+.prose p{margin:0 0 8px}
+.prose h3{font-size:1.15rem;font-weight:700;margin:6px 0 8px}
+.muted{color:var(--muted)}
+.ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.factjud{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.factjud div{border-radius:12px;padding:12px 14px;background:var(--surface-2)}
+.factjud b{display:block;font-size:.75rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.gsearch{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.gsearch input{flex:1 1 220px;min-height:46px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);padding:0 12px;font-size:1rem;color:var(--ink);min-width:0}
+.gloss{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.gterm{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:.95rem}
+.gterm b{display:block;font-family:var(--f-display);font-size:1.05rem;margin-bottom:2px}
+.gterm small{display:block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.empty{color:var(--muted);padding:12px 0}
+.gterm.style{display:flex;flex-direction:column;gap:4px}
+.gterm .sm{font-size:.86rem}
+.gterm .sm span{color:var(--muted);font-weight:600}
+.gterm a{color:var(--accent);font-weight:600;font-size:.86rem;margin-top:2px}
+.lcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.lcard{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;text-decoration:none;color:var(--ink);background:var(--surface-2)}
+.lcard:hover{border-color:var(--accent)}
+.lcard b{font-family:var(--f-display);font-size:1.1rem;color:var(--accent)}
+.lcard span{font-size:.92rem;color:var(--muted)}
+.lcard small{font-family:var(--f-mono);font-size:.72rem;color:var(--muted)}
+textarea{width:100%;min-height:240px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);padding:12px;font-family:var(--f-mono);font-size:.82rem;line-height:1.5;resize:vertical;color:var(--ink)}
+.links{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.links a{min-height:48px;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;font-weight:700;text-decoration:none;color:var(--ink);background:var(--surface-2)}
+.links a:hover{border-color:var(--accent);color:var(--accent)}
+.srcs a{color:var(--accent)}
+.warn{border-left:4px solid var(--cadmium);background:var(--surface-2);border-radius:8px;padding:10px 14px;font-size:.92rem}
+.warn ul{margin:4px 0 0;padding-left:18px}
+.status{font-size:.9rem;color:var(--accent);font-weight:600;min-height:1.4em}
+
+@media (max-width:760px){
+  html,body{height:auto}
+  .app{height:auto}
+  .card,.qcard{overflow:visible}
+  .panel{overflow:visible}
+  .tools{grid-template-columns:minmax(0,1fr)}
+  .main{grid-template-columns:minmax(0,1fr)}
+  .stage{height:62vh;min-height:340px;order:-1}
+}
+@media (max-width:560px){
+  .form,.factjud{grid-template-columns:1fr}
+  .card h2{font-size:1.5rem}
+  .qs li{font-size:1.05rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.veids{display:flex;flex-direction:column;gap:2px}
+.vchips{display:flex;flex-wrap:wrap;gap:6px}
+.vchip{min-height:46px;padding:0 14px;border-radius:12px;border:2px solid var(--line);background:var(--surface);cursor:pointer;font-weight:700;font-size:1rem;color:var(--ink)}
+.vchip:hover{border-color:var(--accent)}
+.vchip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+details.sample{border:2px solid var(--cadmium);border-radius:12px;background:var(--surface-2)}
+details.sample summary{cursor:pointer;padding:10px 14px;font-weight:700;list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:48px;gap:8px}
+details.sample summary::-webkit-details-marker{display:none}
+details.sample summary::after{content:"Rādīt";font-size:.85rem;font-weight:700;color:var(--cadmium-ink);background:var(--cadmium);padding:4px 10px;border-radius:8px}
+details.sample[open] summary::after{content:"Paslēpt"}
+details.sample p{margin:0;padding:0 14px 12px;font-size:1.05rem}
+details.sample p.scr{font-size:.8rem;color:var(--muted)}
+.excards{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.excard{display:flex;flex-direction:column;gap:4px;padding:8px 8px 12px;border:2px solid var(--line);border-radius:14px;background:var(--surface-2);cursor:pointer;text-align:left;color:var(--ink);min-width:0}
+.excard:hover{border-color:var(--accent)}
+.excard img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:var(--line)}
+.excard b{font-family:var(--f-display);font-size:1.05rem;line-height:1.2}
+.exk{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-top:4px}
+.exa{font-size:.85rem;color:var(--muted)}
+@media (max-width:760px){.excards{grid-template-columns:repeat(2,1fr)}}
+/* Sākumekrāns: bumba ripo pāri flīzēm un atklāj gleznu */
+#intro{position:absolute;inset:0;z-index:60;background:#070a18;overflow:hidden;border-radius:0;transition:opacity .6s ease}
+#intro.out{opacity:0;pointer-events:none}
+#introCv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.in-top{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px 28px;z-index:2}
+.in-brand{font-family:var(--f-display);font-weight:800;font-size:1.4rem;color:#eef0f8;letter-spacing:-.01em;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+.in-acts{display:flex;gap:10px}
+.in-btn{min-height:48px;padding:0 18px;border-radius:12px;border:1px solid rgba(238,240,248,.25);background:rgba(10,13,30,.6);backdrop-filter:blur(6px);color:#eef0f8;font:600 1rem var(--f-body);display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.in-btn:hover{border-color:#f5c33b}
+.in-btn svg{width:20px;height:20px}
+.in-end{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:flex-start;padding:0 0 60px 60px;z-index:2;background:linear-gradient(90deg,rgba(7,10,24,.82) 0%,rgba(7,10,24,.35) 38%,rgba(7,10,24,0) 60%);animation:inFade .9s ease both}
+.in-card{max-width:560px;display:flex;flex-direction:column;gap:14px;color:#eef0f8}
+.in-eyebrow{font:700 .95rem var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:#f5c33b}
+.in-title{font-family:var(--f-display);font-weight:800;font-size:4.6rem;line-height:.98;letter-spacing:-.02em;margin:0;text-wrap:balance;text-shadow:0 4px 24px rgba(0,0,0,.5)}
+.in-sub{margin:0;font-size:1.3rem;line-height:1.4;color:#d6daea;text-wrap:pretty}
+.in-author{margin:0;font-size:1.05rem;color:#a5abc4}
+.in-author b{color:#eef0f8}
+.in-start{align-self:flex-start;margin-top:10px;min-height:64px;padding:0 44px;border-radius:16px;border:0;background:#f5c33b;color:#241b00;font:800 1.5rem var(--f-display);cursor:pointer;box-shadow:0 10px 30px rgba(245,195,59,.35);transition:transform .15s}
+.in-start:hover{transform:translateY(-2px)}
+.in-start:focus-visible,.in-btn:focus-visible{outline:3px solid #f5c33b;outline-offset:3px}
+.in-credit{position:absolute;right:28px;bottom:22px;z-index:2;font-size:.9rem;color:#a5abc4;opacity:0;transition:opacity 1s ease;text-align:right;max-width:46%}
+.in-credit.on{opacity:1}
+@keyframes inFade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (max-width:760px){
+  #intro{position:fixed}
+  .in-title{font-size:2.6rem}
+  .in-end{padding:0 20px 70px 20px;background:linear-gradient(0deg,rgba(7,10,24,.9) 0%,rgba(7,10,24,.4) 55%,rgba(7,10,24,0) 80%)}
+  .in-acts .in-btn:first-child{display:none}
+  .in-credit{left:20px;right:20px;max-width:none;text-align:left;bottom:16px}
+}
+@media (prefers-reduced-motion:reduce){.in-end{animation:none}}
+
+/* ---- Rīku komplekts visaskola.lv ---- */
+.top-actions [hidden]{display:none!important}
+#hideRight,#btnRight{display:none!important}
+.pfoot{display:flex;justify-content:flex-end;padding:10px 12px;border-top:1px solid var(--line);background:var(--surface-2)}
+.fsbtn{min-height:44px;font-size:.95rem}
+.brand .mark{background:var(--accent)}
+.penclr{display:none;position:absolute;left:10px;top:10px;z-index:3;align-items:center;min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--wall-line);background:rgba(255,255,255,.92);color:var(--wall-ink);font:700 .9rem var(--f-body);cursor:pointer;box-shadow:0 4px 12px rgba(60,45,20,.18)}
+.area.drawing .penclr{display:flex}
+
+/* ---- Mākslas termini un teorija ---- */
+.main{grid-template-columns:minmax(250px,21%) minmax(0,1fr) minmax(320px,30%)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:5px}
+.tab{min-height:44px;padding:0 18px;border-radius:10px;border:0;background:transparent;font-weight:700;color:var(--muted);cursor:pointer;font-size:1rem}
+.tab:hover{color:var(--ink)}
+.tab.on{background:var(--accent);color:var(--accent-ink)}
+.lbody{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.search{position:relative}
+.search svg{position:absolute;left:12px;top:50%;width:20px;height:20px;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.search input{width:100%;min-height:50px;border-radius:12px;border:2px solid var(--line);background:var(--surface-2);padding:0 12px 0 40px;font-size:1.02rem;color:var(--ink)}
+.search input:focus{border-color:var(--accent);outline:none;background:var(--surface)}
+.seg2{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--surface-2);border-radius:12px;padding:4px}
+.seg2 button{min-height:42px;border:0;border-radius:9px;background:transparent;font-weight:600;font-size:.9rem;cursor:pointer;color:var(--muted);padding:0 6px}
+.seg2 button.on{background:var(--surface);color:var(--accent);box-shadow:0 1px 4px rgba(20,24,48,.12)}
+.cats{display:flex;flex-direction:column;gap:3px}
+.cat{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:44px;padding:0 12px;border-radius:10px;border:0;background:transparent;font-weight:600;cursor:pointer;text-align:left;font-size:.97rem;color:var(--ink)}
+.cat:hover{background:var(--surface-2)}
+.cat.on{background:var(--accent-soft);color:var(--accent)}
+.cat small{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);flex:none}
+.cat.on small{color:var(--accent)}
+.sidenote{font-size:.9rem;color:var(--muted);line-height:1.45}
+.sidenote b{color:var(--ink)}
+.center{background:var(--surface)}
+.chead{padding:14px 18px;border-bottom:1px solid var(--line);background:var(--surface-2);display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.chead h2{font-size:1.35rem;font-weight:800}
+.chead span{font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.cbody{flex:1;overflow-y:auto;padding:14px 16px 18px;min-height:0;display:flex;flex-direction:column;gap:14px}
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.item{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);text-align:left;cursor:pointer;min-width:0;color:var(--ink)}
+.item:hover{border-color:var(--accent)}
+.item.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.item b{font-family:var(--f-display);font-size:1.08rem;line-height:1.2}
+.item small{font-size:.7rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.item span{font-size:.86rem;color:var(--muted);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.period h3{font-size:1rem;font-family:var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin:0 0 8px;font-weight:800;display:flex;align-items:center;gap:10px}
+.period h3::after{content:"";flex:1;height:2px;background:var(--accent-soft)}
+.tl{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.tl .item small{font-family:var(--f-mono);letter-spacing:0;text-transform:none;font-size:.78rem}
+.method{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.mstep{border-radius:12px;padding:12px;background:var(--surface-2);display:flex;flex-direction:column;gap:4px}
+.mstep em{font-style:normal;font-family:var(--f-mono);font-size:.8rem;color:var(--accent);font-weight:700}
+.mstep b{font-family:var(--f-display);font-size:1.05rem}
+.mstep span{font-size:.86rem;color:var(--muted);line-height:1.35}
+.blk h3{font-size:1.1rem;font-weight:800;margin:0 0 8px}
+.steplist{display:flex;flex-direction:column;gap:10px}
+.stp{border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.stp.hl{border-color:var(--cadmium);box-shadow:inset 0 0 0 2px var(--cadmium)}
+.stp header{display:flex;align-items:center;gap:10px}
+.stp header em{font-style:normal;width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--f-mono);font-weight:700;flex:none}
+.stp header b{font-family:var(--f-display);font-size:1.15rem}
+.stp p{margin:0;font-size:.98rem;line-height:1.45}
+.gsel{display:flex;flex-direction:column;gap:4px}
+.card .cat-lbl{font-size:.75rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.card h2.dt{font-size:clamp(1.8rem,4cqh,2.6rem);font-weight:800;line-height:1.08;margin-top:2px}
+.card .dd{margin:0;font-size:clamp(1.1rem,2.4cqh,1.5rem);line-height:1.45}
+.kidbox{border-radius:12px;padding:12px 14px;background:#fff6d9;border:1px solid #f2dc8f}
+.kidbox b{display:block;font-size:.75rem;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-ink);margin-bottom:4px}
+.kidbox p{margin:0;font-size:1.05rem}
+.facts2{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:0;font-size:1rem}
+.facts2 dt{color:var(--muted);font-weight:600}
+.facts2 dd{margin:0}
+.ext{color:var(--accent);font-weight:700;text-decoration:none}
+.ext:hover{text-decoration:underline}
+.empty2{display:flex;flex-direction:column;gap:12px;color:var(--muted);font-size:1.05rem;line-height:1.5}
+.empty2 b{color:var(--ink)}
+.noresult{padding:20px 4px;color:var(--muted);font-size:1.05rem}
+.chip.go{border-style:solid}
+@media (max-width:760px){
+  .main{grid-template-columns:minmax(0,1fr)}
+  .right{order:-1}
+  .lbody,.cbody{overflow:visible}
+  .method{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand" id="homeBtn" role="button" tabindex="0" title="Sākt no jauna" aria-label="Mākslas termini un teorija. Sākt no jauna">
+      <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 12h5"/></svg></div>
+      <div><h1>Mākslas termini un teorija</h1><p>Vārdnīca un meklētājs skolotājam</p><div class="author">Interaktīvā rīka autore: <b>Jolanta Grosberga-Gernere</b></div></div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Sadaļas">
+      <button class="tab on" type="button" role="tab" data-tab="vardnica">Vārdnīca</button>
+      <button class="tab" type="button" role="tab" data-tab="laiks">Virzieni laikā</button>
+      <button class="tab" type="button" role="tab" data-tab="analize">Kā analizēt</button>
+      <button class="tab" type="button" role="tab" data-tab="avoti">Avoti</button>
+    </nav>
+  </header>
+
+  <main class="main">
+    <aside class="panel left" aria-label="Meklēšana un filtri">
+      <div class="lbody">
+        <div class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>
+          <input id="q" type="search" placeholder="Meklēt terminu vai mākslinieku…" aria-label="Meklēt terminu vai mākslinieku" autocomplete="off">
+        </div>
+        <div>
+          <div class="sub">Skaidrojums</div>
+          <div class="seg2" id="lvl">
+            <button type="button" class="on" data-lvl="full">Pilns</button>
+            <button type="button" data-lvl="kid">Vienkāršs (1.–3. kl.)</button>
+          </div>
+        </div>
+        <div id="side"></div>
+      </div>
+    </aside>
+
+    <section class="panel center" aria-label="Saraksts">
+      <div class="chead" id="chead"></div>
+      <div class="cbody" id="cbody"></div>
+    </section>
+
+    <aside class="panel right" aria-label="Skaidrojums">
+      <div class="rhead"><span>Skaidrojums</span></div>
+      <article class="card" id="detail"></article>
+      <div class="pfoot"><button class="btn fsbtn" id="btnFull" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg><span id="fullTxt">Atvērt pilnekrāna režīmu</span></button></div>
+    </aside>
+  </main>
+</div>
+
+<script>(function(){
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const CATS={stili:'Mākslas virzieni un stili',pamat:'Pamatjēdzieni',komp:'Kompozīcija un telpa',krasa:'Krāsa, gaisma, materiāls',saturs:'Saturs un simboli',konteksts:'Konteksts un vērtējums'};
+const G={
+ veids:{t:'Mākslas veids',c:'pamat',d:'Mākslas iedalījums pēc materiāla un izteiksmes līdzekļiem: glezniecība, grafika, tēlniecība, arhitektūra, dizains, fotogrāfija, instalācija u. c.',k:'Kā darbs ir radīts: uzgleznots, uzzīmēts, izveidots no māla vai akmens, nofotografēts.'},
+ zanrs:{t:'Žanrs',c:'pamat',d:'Mākslas darbu iedalījums pēc tematikas: portrets, ainava, klusā daba, sadzīves, vēsturiskais, batāliskais (kauju), mitoloģiskais, reliģiskais un animālais (dzīvnieku) žanrs.'},
+ portrets:{t:'Portrets',c:'pamat',d:'Konkrēta cilvēka vai cilvēku grupas attēlojums. Pašportrets ir mākslinieka paša attēls.',k:'Attēls, kurā redzams cilvēks un viņa seja.'},
+ ainava:{t:'Ainava',c:'pamat',d:'Dabas vai pilsētas skata attēlojums. Jūras ainavu sauc par marīnu.',k:'Attēls, kurā redzama daba: koki, lauki, ūdens, debesis.'},
+ klusa:{t:'Klusā daba',c:'pamat',d:'Žanrs, kurā attēlo nedzīvus dabas un sadzīves priekšmetus: traukus, augļus, ziedus, grāmatas, audumus, arī medījumus.',k:'Attēls ar priekšmetiem uz galda: augļiem, traukiem, ziediem.'},
+ sadzive:{t:'Sadzīves žanrs',c:'pamat',d:'Ikdienas dzīves ainas: darbs, atpūta, svētki, ģimenes dzīve.'},
+ formats:{t:'Formāts',c:'pamat',d:'Darba laukuma forma un izmēri: horizontāls, vertikāls, kvadrātveida, apaļš vai ovāls.'},
+ tehnika:{t:'Tehnika',c:'krasa',d:'Paņēmienu un materiālu kopums, ar ko darbs izveidots: eļļas glezniecība, akvarelis, oforts, linogriezums, kolāža u. c.'},
+ kompozicija:{t:'Kompozīcija',c:'komp',d:'Mākslas darba daļu izkārtojums un to savstarpējās attiecības vienotā veselumā.'},
+ dominante:{t:'Dominante',c:'komp',d:'Kompozīcijas centrs: elements, kas pirmais piesaista skatienu. To izceļ ar lielumu, krāsu, gaismu, novietojumu vai kontrastu.'},
+ plani:{t:'Plāni',c:'komp',d:'Telpas dziļuma slāņi: priekšplāns (tuvākais), vidusplāns un tālais plāns jeb fons.',k:'Kas ir tuvu (priekšā) un kas ir tālu (aizmugurē).'},
+ lidzsvars:{t:'Līdzsvars',c:'komp',d:'Vizuālā svara sadalījums darbā. Simetrisks līdzsvars: abas puses līdzīgas. Asimetrisks: puses atšķirīgas, bet vizuāli līdzsvarotas.'},
+ simetrija:{t:'Simetrija',c:'komp',d:'Elementu spoguļveida izkārtojums attiecībā pret asi. Rada mieru, stabilitāti un svinīgumu.'},
+ ritms:{t:'Ritms',c:'komp',d:'Formu, līniju, krāsu vai laukumu atkārtošanās noteiktā secībā. Ritms var būt vienmērīgs vai mainīgs.'},
+ kontrasts:{t:'Kontrasts',c:'komp',d:'Izteikts pretstats: gaišs un tumšs, liels un mazs, silts un vēss, gluds un raupjš, kustība un miers.'},
+ tresdalas:{t:'Trešdaļu likums',c:'komp',d:'Laukumu ar divām vertikālām un divām horizontālām līnijām sadala deviņās vienādās daļās. Svarīgos elementus novieto uz līnijām vai to krustpunktos.'},
+ zelta:{t:'Zelta griezums',c:'komp',d:'Proporcija aptuveni 1 : 1,618, kurā lielākā daļa attiecas pret mazāko tāpat kā viss pret lielāko (aptuveni 62\u00a0% un 38\u00a0%). Daudzi to uzskata par harmonisku. Matemātiski to aprakstīja jau Eiklīds, bet mākslā tai īpaši pievērsās renesanses mākslinieki.'},
+ diagonale:{t:'Diagonālā kompozīcija',c:'komp',d:'Galvenās formas vai kustība izvietota pa diagonāli. Tā rada dinamiku un virza skatienu uz svarīgāko.'},
+ horizonts:{t:'Horizonta līnija',c:'komp',d:'Iedomāta līnija skatītāja acu augstumā, kur debesis satiekas ar zemi vai ūdeni. Zems horizonts izceļ debesis, augsts izceļ zemi.'},
+ linpersp:{t:'Lineārā perspektīva',c:'komp',d:'Telpas attēlošana, kurā paralēlas līnijas tālumā saiet nozušanas punktā, bet priekšmeti tālumā kļūst mazāki.'},
+ gaisapersp:{t:'Gaisa perspektīva',c:'komp',d:'Dziļuma iespaids, ko rada krāsa un tonis: tālumā kontrasti mazinās, krāsas kļūst bālākas un zilganākas.'},
+ kolorits:{t:'Kolorīts',c:'krasa',d:'Darba krāsu kopējais raksturs un krāsu attiecību sistēma: silts, vēss, spilgts, pieklusināts, kontrastējošs vai harmonisks.'},
+ silt:{t:'Siltās un vēsās krāsas',c:'krasa',d:'Siltās krāsas (sarkanā, oranžā, dzeltenā) saistās ar sauli un uguni un šķiet tuvākas. Vēsās krāsas (zilā, zilganzaļā, violetā) saistās ar ūdeni un ēnu un šķiet attālākas.',k:'Siltās krāsas ir kā saule un uguns: sarkana, oranža, dzeltena. Vēsās krāsas ir kā ūdens un ledus: zila, zilganzaļa, violeta.'},
+ pamatkr:{t:'Pamatkrāsas',c:'krasa',d:'Tradicionālajā krāsu aplī tās ir sarkanā, dzeltenā un zilā. Tās nevar sajaukt no citām krāsām, bet, tās jaucot, iegūst daudzas citas: oranžo, zaļo, violeto. Drukā lieto zilganzaļo, purpursarkano un dzelteno krāsu, bet ekrānā jauc sarkanu, zaļu un zilu gaismu.',k:'Sarkanā, dzeltenā un zilā. Tās jaucot, var iegūt daudzas citas krāsas.'},
+ papildkr:{t:'Papildkrāsas (komplementārās krāsas)',c:'krasa',d:'Krāsu aplī pretēji novietotas krāsas: sarkanā un zaļā, zilā un oranžā, dzeltenā un violetā. Novietotas blakus, tās viena otru pastiprina.'},
+ harmonija:{t:'Krāsu harmonija',c:'krasa',d:'Krāsu saskaņa, piemēram, radniecīgu (krāsu aplī blakus esošu) krāsu harmonija vai vienas krāsas toņu harmonija.'},
+ piesat:{t:'Piesātinājums',c:'krasa',d:'Krāsas tīrība un intensitāte. Piesātināta krāsa ir spilgta, nepiesātināta ir pieklusināta, pelēcīga.'},
+ tonis:{t:'Tonis (gaišums)',c:'krasa',d:'Laukuma vai krāsas gaišuma pakāpe neatkarīgi no nokrāsas. Ikdienā ar „toni” saprot arī krāsas nokrāsu, piemēram, zilganu toni.',k:'Cik gaišs vai tumšs ir kāds attēla laukums.'},
+ tonkontr:{t:'Toņu kontrasts',c:'krasa',d:'Gaišu un tumšu laukumu pretstats. Liels kontrasts rada dramatismu, mazs kontrasts rada maigumu un mieru.'},
+ gaismena:{t:'Gaismēna',c:'krasa',d:'Gaismas un ēnas sadalījums uz priekšmeta: atspīdums, gaisma, pusēna, gaismēnas robeža, pašēna, reflekss un krītošā ēna. Gaismēna rada apjoma iespaidu.'},
+ faktura:{t:'Faktūra',c:'krasa',d:'Virsmas raksturs, ko var sataustīt: gluda, raupja, reljefa virsma vai biezi uzklāta krāsa.',k:'Kāda virsma ir, ja tai pieskaras: gluda vai raupja.'},
+ triepiens:{t:'Triepiens',c:'krasa',d:'Ar otu vai paletes nazi uzklātas krāsas pēda. Tā var būt gluda un gandrīz neredzama vai izteikta, ritmiska un bieza.'},
+ materials:{t:'Materiāls',c:'krasa',d:'Viela vai priekšmeti, no kā darbs izgatavots: eļļas krāsa, akvarelis, ogle, marmors, bronza, papīrs, atrasti priekšmeti.'},
+ sizets:{t:'Sižets',c:'saturs',d:'Notikums vai situācija, kas attēlota darbā.'},
+ motivs:{t:'Motīvs',c:'saturs',d:'Tēmas elements vai attēlojuma priekšmets, piemēram, logs, ceļš, māte ar bērnu. Motīvs var atkārtoties vienā darbā vai mākslinieka daiļradē.'},
+ simbols:{t:'Simbols',c:'saturs',d:'Tēls vai priekšmets, kas norāda uz plašāku nozīmi, piemēram, balodis kā miera zīme. Simbola nozīme ir atkarīga no kultūras un laikmeta.'},
+ atributs:{t:'Atribūts',c:'saturs',d:'Priekšmets, pēc kura atpazīst tēlu, piemēram, pēc trijzobja atpazīst jūras dievu Neptūnu.'},
+ realisms:{t:'Reālistisks attēlojums',c:'saturs',d:'Attēlojums, kas tuvs redzamajai īstenībai: dabiskas proporcijas, apjoms un telpa.'},
+ idealiz:{t:'Idealizācija',c:'saturs',d:'Attēlojums, kurā tēls parādīts skaistāks un pilnīgāks nekā dzīvē.'},
+ stiliz:{t:'Stilizācija',c:'saturs',d:'Formu vienkāršošana un pārveidošana, lai uzsvērtu raksturīgāko, piemēram, ornamentā.'},
+ abstrakc:{t:'Abstrakcija',c:'saturs',d:'Darbs bez atpazīstamiem priekšmetiem. Izteiksmi rada krāsa, līnija, forma un laukums.'},
+ noskana:{t:'Noskaņa',c:'saturs',d:'Emocionālais iespaids, ko darbs rada: priecīgs, mierīgs, skumjš, satraucošs, noslēpumains.',k:'Sajūta, kas rodas, skatoties attēlu: prieks, miers, skumjas.'},
+ fakts:{t:'Fakts un spriedums',c:'pamat',d:'Faktu var pārbaudīt, aplūkojot darbu („kreisajā pusē ir koks”). Spriedums ir mūsu interpretācija („koks šķiet vientuļš”).'},
+ konteksts:{t:'Konteksts',c:'konteksts',d:'Apstākļi, kuros darbs radīts: laikmets, vieta, kultūra, sabiedrība un autora dzīve.'},
+ virziens:{t:'Mākslas virziens',c:'konteksts',d:'Mākslinieku grupa vai periods ar kopīgiem principiem, piemēram, impresionisms, kubisms, ekspresionisms.'},
+ stils:{t:'Stils',c:'konteksts',d:'Raksturīgu izteiksmes līdzekļu kopums, kas atšķir laikmetu, virzienu vai konkrētu autoru.'},
+ interpr:{t:'Interpretācija',c:'konteksts',d:'Darba nozīmes skaidrojums, kas balstīts uz novērojumiem un kontekstu. Var būt vairākas pamatotas interpretācijas.'},
+ vertejums:{t:'Vērtējums',c:'konteksts',d:'Argumentēts spriedums par darbu: cik veiksmīgi izteiksmes līdzekļi atbalsta ideju un kāda ir darba ietekme uz skatītāju.'},
+ linija:{t:'Līnija',c:'pamat',d:'Pamata izteiksmes līdzeklis: punkta kustības pēda. Līnija var būt taisna, lauzta, viļņota, bieza vai tieva. Ar to veido kontūru, ritmu un kustības virzienu.',k:'Svītra, ko atstāj zīmulis vai ota. Tā var būt taisna, viļņota, bieza vai tieva.'},
+ laukums:{t:'Laukums',c:'pamat',d:'Plakana virsmas daļa, kas aizpildīta ar krāsu, toni vai rakstu un ko ierobežo kontūra vai citi laukumi.',k:'Ar krāsu aizpildīta vieta attēlā.'},
+ forma:{t:'Forma',c:'pamat',d:'Priekšmeta ārējais veidols. Plaknē forma ir divdimensionāla (aplis, kvadrāts), telpā – trīsdimensionāla (lode, kubs). Formas var būt ģeometriskas vai brīvas (organiskas).',k:'Priekšmeta veidols: apaļš, stūrains, garš vai īss.'},
+ apjoms:{t:'Apjoms',c:'komp',d:'Priekšmeta trīsdimensionalitāte: augstums, platums un dziļums. Plaknē apjoma iespaidu rada gaismēna un perspektīva.'},
+ siluets:{t:'Siluets',c:'komp',d:'Priekšmeta vai figūras attēls, kurā laukums ārējās kontūras robežās aizpildīts ar vienu krāsu vai toni, bez iekšējām detaļām.',k:'Priekšmeta „ēnas attēls”: redzama tikai ārējā kontūra.'},
+ proporcijas:{t:'Proporcijas',c:'komp',d:'Daļu lielumu attiecības savā starpā un pret veselumu, piemēram, galvas augstuma un visas figūras augstuma attiecība.'},
+ skatpunkts:{t:'Skatpunkts',c:'komp',d:'Vieta, no kuras skatītājs vai mākslinieks raugās uz attēloto: no augšas (putna lidojuma skatpunkts), acu augstumā vai no apakšas (vardes skatpunkts).'},
+ kadrejums:{t:'Kadrējums',c:'komp',d:'Attēla robežu izvēle fotogrāfijā, kino vai glezniecībā: kas nonāk kadrā un kas paliek ārpus tā.'},
+ tekstura:{t:'Tekstūra',c:'krasa',d:'Virsmas raksts, ko redz, piemēram, koka šķiedru, marmora vai auduma raksts.'},
+ ornaments:{t:'Ornaments',c:'saturs',d:'Raksts, ko veido ritmiski atkārtoti elementi: ģeometriskas figūras, augu vai dzīvnieku motīvi, zīmes. Ar ornamentu rotā priekšmetus, apģērbu un arhitektūru.'},
+ mv_glezn:{t:'Glezniecība',c:'pamat',d:'Mākslas veids, kurā attēlu veido ar krāsām uz plaknes, piemēram, uz audekla, papīra, koka dēļa vai sienas. Tehnikas: eļļas glezniecība, akvarelis, guaša, tempera, akrila glezniecība.'},
+ mv_graf:{t:'Grafika',c:'pamat',d:'Mākslas veids, kura galvenie izteiksmes līdzekļi ir līnija, laukums, tonis un faktūra. Zīmējums ir unikālā grafika, bet iespiedgrafikā (kokgriezums, linogriezums, oforts, litogrāfija, sietspiede) darbu iespiež vairākos eksemplāros.'},
+ mv_teln:{t:'Tēlniecība',c:'pamat',d:'Mākslas veids, kurā no akmens, koka, metāla, māla un citiem materiāliem veido telpiskus darbus – skulptūras un reljefus.'},
+ mv_foto:{t:'Fotogrāfija',c:'pamat',d:'Mākslas veids, kurā attēlu iegūst ar kameru, fiksējot gaismu uz gaismjutīga materiāla vai digitāla sensora. Fotogrāfija var būt dokuments, reportāža vai mākslas darbs.'},
+ mv_diz:{t:'Dizains',c:'pamat',d:'Priekšmetu, vides un vizuālās komunikācijas mākslinieciska projektēšana, kurā forma ir saistīta ar funkciju: mēbeles, apģērbs, plakāti, logotipi, iepakojums.'},
+ mv_arh:{t:'Arhitektūra',c:'pamat',d:'Ēku un telpu projektēšanas un celtniecības māksla, kas apvieno lietderību, izturību un skaistumu.'}
+};
+
+/* ---------- Mākslas virzieni un stili ---------- */
+const TATE='https://www.tate.org.uk/art/art-terms/';
+const STY=[
+ {t:'Abstraktais ekspresionisms',al:['abstract expressionism'],laiks:'1940.–1960. g., ASV',p:'Lieli formāti, spontāni, enerģiski triepieni vai plaši krāsu laukumi. Emocijas izsaka bez atpazīstamiem priekšmetiem.',m:'Džeksons Polloks, Marks Rotko, Vilems de Kūnings',lv:'Marks Rotko dzimis Daugavpilī, kur tagad darbojas Rotko muzejs (agrākais Marka Rotko mākslas centrs)',u:'a/abstract-expressionism'},
+ {t:'Akadēmisms',al:['akadēmiskā māksla','academic'],laiks:'17.–19. gs., Eiropa',p:'Mākslas akadēmiju noteikumi: precīzs zīmējums, gluda gleznojuma virsma, vēsturiski, mitoloģiski un reliģiski sižeti, idealizēti tēli.',m:'Viljams Bugro (William-Adolphe Bouguereau), Aleksandrs Kabanels',lv:'Kārlis Hūns',u:'a/academy'},
+ {t:'Ardeko',al:['art deco','ar deko'],laiks:'1920.–1930. g., Eiropa un ASV',p:'Ģeometriskas, stilizētas formas, simetrija, greznība un modernas tehnikas motīvi. Izpaudās dizainā, arhitektūrā un plakātos.',m:'Tamāra de Lempicka, Kasandrs (A. M. Cassandre)',lv:'Sigismunds Vidbergs (grafika)',u:'a/art-deco'},
+ {t:'Baroks',al:['baroque'],laiks:'16. gs. beigas – 18. gs. vidus, Eiropa',p:'Dinamiska kompozīcija ar diagonālēm, spēcīgs gaismas un ēnas kontrasts, dramatisms, kustība un greznība.',m:'Karavadžo, Pēteris Pauls Rubenss, Rembrants, Djego Velaskess',lv:'Rundāles pils (vēlīnais baroks, arh. F. B. Rastrelli)',u:'b/baroque'},
+ {t:'Bauhaus',al:['bauhauss','bauhaus'],laiks:'1919.–1933. g., Vācija',p:'Mākslas un dizaina skola. Princips „forma seko funkcijai”: vienkāršas ģeometriskas formas, mākslas, amatniecības un rūpniecības apvienojums.',m:'Valters Gropiuss, Pauls Klē, Vasilijs Kandinskis',lv:'',u:'b/bauhaus'},
+ {t:'Bizantiešu māksla',al:['bizantija','byzantine'],laiks:'4.–15. gs., Austrumromas impērija',p:'Ikonas un mozaīkas ar zelta fonu, plakanas, stilizētas un svinīgas figūras, reliģiski sižeti, stingri kanoni.',m:'Ravennas mozaīkas, Andrejs Rubļovs (ikonas bizantiešu tradīcijā)',lv:'',u:''},
+ {t:'Dadaisms',al:['dada'],laiks:'1916.–1924. g., Šveice, Vācija, Francija, ASV',p:'Protests pret karu un mākslas tradīcijām: absurds, nejaušība, kolāža, gatavie priekšmeti (readymade).',m:'Marsels Dišāns, Hanss Arps, Kurts Švitterss',lv:'',u:'d/dada'},
+ {t:'Ekspresionisms',al:['expressionism'],laiks:'1905.–1920. g., galvenokārt Vācija',p:'Mākslinieka emociju izteikšana: deformētas formas, spilgtas, nedabiskas krāsas, asas līnijas un satraucoša noskaņa.',m:'Ernsts Ludvigs Kirhners, Egons Šīle, Edvards Munks (priekštecis)',lv:'Jēkabs Kazaks („Bēgļi”, 1917), Kārlis Padegs',u:'e/expressionism'},
+ {t:'Fotoreālisms',al:['hiperreālisms','photorealism'],laiks:'1960.–1970. g., ASV',p:'Gleznas, kas izskatās kā fotogrāfijas. Bieži gleznotas pēc fotogrāfijām, ar ikdienas pilsētas motīviem un ļoti precīzām detaļām.',m:'Čaks Klouzs, Ričards Estess',lv:'Miervaldis Polis, Līga Purmale (20. gs. 70. gadi)',u:'p/photorealism'},
+ {t:'Fovisms',al:['fauvism','fovisti'],laiks:'1905.–1908. g., Francija',p:'Spilgtas, tīras, nedabiskas krāsas, vienkāršotas formas un izteikti triepieni. Krāsa izsaka jūtas, nevis attēlo dabu.',m:'Anrī Matiss, Andrē Derēns',lv:'',u:'f/fauvism'},
+ {t:'Futūrisms',al:['futurism'],laiks:'1909.–1916. g., Itālija',p:'Kustības, ātruma, tehnikas un pilsētas cildināšana. Dinamiskas līnijas un atkārtotas formas rada kustības iespaidu.',m:'Umberto Bočoni, Džakomo Balla',lv:'',u:'f/futurism'},
+ {t:'Gotika',al:['gothic','gotiskā'],laiks:'12.–15. gs., Eiropa',p:'Smailloki, vertikālisms un tiekšanās augšup, vitrāžas, katedrāles, izstieptas un slaidas figūras.',m:'Šartras katedrāle, Parīzes Dievmātes katedrāle',lv:'Rīgas Sv. Pētera baznīca (izņemot baroka torni un rietumu portālus), Rīgas Doms (agrīnā gotika)',u:''},
+ {t:'Ielu māksla',al:['street art','grafiti','murālis'],laiks:'20. gs. 70. gadi – mūsdienas',p:'Darbi publiskā telpā: grafiti, trafareti, murāļi, uzlīmes. Bieži ar sociālu vai politisku vēstījumu.',m:'Benksijs, Kīts Herings',lv:'',u:'s/street-art'},
+ {t:'Impresionisms',al:['impressionism'],laiks:'1860.–1880. g. (grupas izstādes 1874.–1886. g.), Francija',p:'Gaismas un mirkļa tveršana. Gleznošana brīvā dabā, īsi, atsevišķi triepieni un gaišas krāsas. Ēnas ir krāsainas, kontūru nav.',m:'Klods Monē, Ogists Renuārs, Kamils Pisarro, Edgars Degā',lv:'Vilhelms Purvītis, Johans Valters (impresionisma ietekme)',u:'i/impressionism'},
+ {t:'Jūgendstils',al:['art nouveau','modern','secesija'],laiks:'1890.–1910. g., Eiropa',p:'Plūstošas, viļņotas līnijas, augu un sievietes tēla motīvi, dekoratīvums, mākslas un dizaina vienotība.',m:'Alfonss Muha, Gustavs Klimts',lv:'Rīgas jūgendstila arhitektūra (Alberta iela, Mihails Eizenšteins), Jānis Rozentāls',u:'a/art-nouveau'},
+ {t:'Klasicisms',al:['neoklasicisms','neoclassicism'],laiks:'18. gs. otrā puse – 19. gs. sākums, Eiropa',p:'Antīkās mākslas paraugi: skaidra un līdzsvarota kompozīcija, simetrija, noteikta līnija, varonīgi un morāli sižeti.',m:'Žaks Luijs Davids, Antonio Kanova',lv:'Mežotnes pils (arh. Džakomo Kvarengi, 1797.–1802. g.)',u:'n/neoclassicism'},
+ {t:'Konceptuālā māksla',al:['conceptual'],laiks:'20. gs. 60. gadi – mūsdienas',p:'Ideja ir svarīgāka par izpildījumu. Darbs var būt teksts, dokuments, fotogrāfija vai instalācija.',m:'Džozefs Košuts, Sols Levits',lv:'',u:'c/conceptual-art'},
+ {t:'Konstruktīvisms',al:['constructivism'],laiks:'1915.–1930. g., Krievija',p:'Ģeometriskas formas, industriāli materiāli, māksla sabiedrības kalpībā. Liela ietekme uz dizainu, plakātu un arhitektūru.',m:'Vladimirs Tatlins, Aleksandrs Rodčenko',lv:'Gustavs Klucis',u:'c/constructivism'},
+ {t:'Kubisms',al:['cubism'],laiks:'1907.–1914. g., Francija',p:'Priekšmeti sadalīti ģeometriskās plaknēs un parādīti no vairākiem skatpunktiem vienlaikus. Krāsu gamma bieži ierobežota.',m:'Pablo Pikaso, Žoržs Braks',lv:'Romans Suta, Aleksandra Beļcova (kubisma ietekme, Rīgas mākslinieku grupa, 20. gs. 20. gadi)',u:'c/cubism'},
+ {t:'Manierisms',al:['mannerism','mannerist'],laiks:'1520.–1600. g., Itālija un Eiropa',p:'Izstieptas figūras, mākslīgas un sarežģītas pozas, neparastas krāsas un telpa. Atkāpšanās no renesanses harmonijas.',m:'Parmidžanīno, Pontormo, El Greko',lv:'',u:'m/mannerist'},
+ {t:'Minimālisms',al:['minimalism'],laiks:'20. gs. 60. gadi, ASV',p:'Vienkāršas ģeometriskas formas, atkārtojums, industriāli materiāli. Nekā lieka: nav ne stāsta, ne emociju.',m:'Donalds Džads, Karls Andrē',lv:'',u:'m/minimalism'},
+ {t:'Naivā māksla',al:['naive','naīvā'],laiks:'19.–20. gs.',p:'Mākslinieki bez akadēmiskas izglītības: vienkāršotas formas, spilgtas krāsas, plakana telpa, rūpīgi izstrādātas sīkas detaļas.',m:'Anrī Ruso, Niko Pirosmani',lv:'',u:'n/naive-art'},
+ {t:'Neoimpresionisms',al:['puantilisms','pointillism','neo-impressionism'],laiks:'1880.–1890. g., Francija',p:'Tīras krāsas uzklātas mazos punktos, kas sajaucas skatītāja acī. Zinātniska pieeja krāsai un rūpīgi plānota kompozīcija.',m:'Žoržs Sērā, Pols Sinjaks',lv:'',u:'n/neo-impressionism'},
+ {t:'Op māksla',al:['op art','optiskā māksla'],laiks:'20. gs. 60. gadi',p:'Optiskas ilūzijas: ģeometriski raksti un kontrasti rada kustības, mirgošanas vai telpas iespaidu.',m:'Viktors Vazarelī, Bridžita Railija',lv:'',u:'o/op-art'},
+ {t:'Popārts',al:['pop art','pop māksla'],laiks:'20. gs. 50. gadu beigas – 60. gadi, ASV un Lielbritānija',p:'Masu kultūras attēli: reklāma, komiksi, preces, slavenības. Spilgtas krāsas, sietspiede, atkārtojums.',m:'Endijs Vorhols, Rojs Lihtenšteins',lv:'',u:'p/pop-art'},
+ {t:'Postimpresionisms',al:['post-impressionism'],laiks:'1886.–1905. g., Francija',p:'Mākslinieki, kas attīstīja impresionismu katrs savā virzienā: spēcīgas krāsas, izteiktas kontūras, uzsvars uz formu, struktūru vai emocijām.',m:'Vinsents van Gogs, Pols Sezans, Pols Gogēns',lv:'',u:'p/post-impressionism'},
+ {t:'Prerafaelīti',al:['pre-raphaelite','prerafaelītu brālība'],laiks:'1848.–1860. g., Anglija',p:'Ļoti detalizēts attēlojums, spilgtas krāsas, literāri un leģendāri sižeti, viduslaiku tēmas, rūpīgi gleznota daba.',m:'Dante Gabriels Roseti, Džons Everets Millē',lv:'',u:'p/pre-raphaelite'},
+ {t:'Reālisms',al:['realism'],laiks:'19. gs. vidus, Francija',p:'Ikdienas dzīve, vienkārši cilvēki un viņu darbs. Patiess attēlojums bez idealizācijas un izskaistināšanas.',m:'Gistavs Kurbē, Žans Fransuā Millē',lv:'Jānis Rozentāls („No baznīcas”, 1894), Jūlijs Feders',u:'r/realism'},
+ {t:'Renesanse',al:['renaissance','atdzimšana'],laiks:'14.–16. gs., Itālija un Eiropa',p:'Antīkās kultūras atdzimšana. Cilvēks centrā, lineārā perspektīva, anatomijas izpēte, harmoniskas proporcijas.',m:'Leonardo da Vinči, Mikelandželo, Rafaēls',lv:'',u:'r/renaissance'},
+ {t:'Rokoko',al:['rococo'],laiks:'1730.–1770. g., Francija un Eiropa',p:'Viegls un dekoratīvs stils: gaišas pasteļkrāsas, asimetriski gliemežvāka ornamenti, galantas un rotaļīgas ainas.',m:'Antuāns Vato, Fransuā Bušē, Žans Onorē Fragonārs',lv:'Rundāles pils interjeri (1765.–1768. g.)',u:'r/rococo'},
+ {t:'Romānika',al:['romanesque','romāņu stils'],laiks:'10.–12. gs., Eiropa',p:'Biezas sienas, pusloka arkas, masīvas un smagas formas, mazi logi, stilizēti akmens reljefi.',m:'Vormsas katedrāle, Santjago de Kompostelas katedrāle',lv:'Rīgas Doma baznīcas vecākās daļas',u:''},
+ {t:'Romantisms',al:['romanticism'],laiks:'1800.–1850. g., Eiropa',p:'Jūtas un iztēle svarīgākas par prātu: daba kā varens spēks, varonība, eksotika, dramatiska gaisma un kustība.',m:'Kaspars Dāvids Frīdrihs, Ežēns Delakruā, Viljams Tērners',lv:'',u:'r/romanticism'},
+ {t:'Simbolisms',al:['symbolism'],laiks:'1880.–1910. g., Eiropa',p:'Iekšējā pasaule, sapņi, mīti un simboli. Noslēpumaina, poētiska noskaņa, ideja svarīgāka par redzamo īstenību.',m:'Gistavs Moro, Odilons Redons, Arnolds Beklins',lv:'Jānis Rozentāls („Princese ar pērtiķi”)',u:'s/symbolism'},
+ {t:'Sirreālisms',al:['surrealism'],laiks:'1924. g. – 20. gs. vidus, Francija un pasaule',p:'Sapņi un zemapziņa: negaidīti priekšmetu savienojumi, neiespējamas ainas, kas uzgleznotas reālistiski.',m:'Salvadors Dalī, Renē Magrits, Makss Ernsts',lv:'',u:'s/surrealism'},
+ {t:'Supremātisms',al:['suprematism'],laiks:'1915.–1920. g., Krievija',p:'Tīras ģeometriskas formas (kvadrāts, aplis, krusts) uz balta fona. Pilnīgi bezpriekšmetiska māksla.',m:'Kazimirs Maļevičs, El Lisickis',lv:'',u:'s/suprematism'},
+ {t:'Zemes māksla',al:['land art','lendārts'],laiks:'1960.–1970. g., ASV un Lielbritānija',p:'Darbi dabā un no dabas materiāliem: akmeņiem, zemes, lapām. Darbi bieži ir īslaicīgi, tāpēc tos dokumentē fotogrāfijās.',m:'Roberts Smitsons, Ričards Longs, Endijs Goldsvortijs',lv:'Pedvāles brīvdabas mākslas muzejs (Ojārs Feldbergs): vides māksla dabā, radniecīga zemes mākslai',u:'l/land-art'}
+];
+STY.forEach((x,i)=>{G['st'+i]={t:x.t,c:'stili',d:x.p,st:x};});
+
+const GRADE_LABEL={g1:'1.–3.',g2:'4.–6.',g3:'7.–9.'};
+const MOODS=[['😊','Prieks'],['😌','Miers'],['😢','Skumjas'],['😮','Pārsteigums'],['😟','Satraukums'],['🤔','Ziņkāre']];
+const STEPS={
+ g1:[
+  {t:'Ko es redzu?',veidsSel:true,th:'Mākslas darbu skatāmies lēnām. Vispirms tikai stāstām, ko redzam, un vēl nevērtējam.',q:['Ko tu redzi attēlā? Nosauc trīs lietas.','Kas ir pats lielākais? Kas pats mazākais?','Kas atrodas tuvu, un kas ir tālu?','Kādas līnijas un formas tu redzi: taisnas, viļņotas, apaļas, stūrainas?'],terms:['portrets','ainava','klusa','plani'],tools:['draw'],tip:'Pirms sākt, vienojies ar skolēniem: katrs var redzēt citādi, visas domas ir vērtīgas, runājam pa vienam un rādām uz attēla. Ļauj skolēniem nākt pie tāfeles un apvilkt atrasto.',facts:[]},
+  {t:'Kādas krāsas?',th:'Krāsas var būt siltas vai vēsas. Siltās krāsas šķiet tuvākas un priecīgākas, vēsās šķiet mierīgākas un tālākas.',q:['Kuras krāsas attēlā ir visvairāk?','Vai krāsas ir siltas kā saule un uguns vai vēsas kā ūdens un ledus?','Atrodi kādu krāsu, kas attēlā parādās vairākās vietās!'],terms:['silt','pamatkr'],tools:['palette','tempv'],tip:'Atver paleti un noklikšķini uz krāsas: rīks parāda, kur tā atrodas attēlā. Vispirms ļauj skolēniem minēt.',facts:['palette','temp']},
+  {t:'Kāda noskaņa?',th:'Noskaņu rada krāsas, gaisma un tas, kas notiek attēlā. Gaišs attēls bieži šķiet priecīgs, tumšs šķiet noslēpumains vai skumjš.',q:['Kā tu justos, ja varētu ieiet šajā attēlā?','Ko tu attēlā redzi, kas liek tev tā domāt?','Kas rada šo sajūtu: krāsas, gaisma vai tas, kas attēlots?','Kādas skaņas te varētu dzirdēt? Kādas smaržas sajust?'],moods:true,terms:['noskana','tonis'],tools:['gray'],tip:'Vispirms ļauj skolēniem pašiem nosaukt sajūtu saviem vārdiem. Emocijzīmes rādi tikai pēc tam, lai palīdzētu atrast vārdu. Salīdzini krāsaino un pelēko attēlu: vai noskaņa mainās?',facts:['temp','tone']},
+  {t:'Man patīk',th:'Katram var patikt kas cits. Svarīgi pastāstīt, kāpēc tev patīk.',q:['Kas tev šajā darbā patīk visvairāk? Kāpēc?','Vai tavs draugs varētu just citādi? Paklausies, ko viņš saka.','Ko tu no šī darba gribētu izmēģināt savā zīmējumā?','Kā tu nosauktu šo darbu?'],terms:[],tools:['draw'],tip:'Jautājums par savu zīmējumu labi sasaistās ar radošo uzdevumu.',facts:[]}
+ ],
+ g2:[
+  {t:'Pirmā apskate',th:'Analīze notiek pakāpeniski: vispirms apraksti, ko redzi, tad pēti, kā darbs veidots, un tikai tad meklē nozīmi. Atšķir faktu („kreisajā pusē ir koks”) no sprieduma („koks šķiet vientuļš”).',veidsSel:true,q:['Kāds ir žanrs: portrets, ainava, klusā daba vai sadzīves aina?','Ko tu ieraugi pirmajā mirklī?','Kas attēlots? Stāsti tikai faktus, ko var pārbaudīt, aplūkojot darbu.'],terms:['veids','zanrs','portrets','ainava','klusa','sadzive','formats','fakts'],tools:['draw'],tip:'Vienojieties par sarunas noteikumiem: uzklausām citus, savu domu pamatojam ar to, ko redzam darbā, un kritizējam darbu, nevis cilvēku. Ja skolēns izsaka spriedumu, pajautā: „Ko tieši tu redzi?”',facts:['format'],meta:true},
+  {t:'Kompozīcija un telpa',th:'Kompozīcija ir veids, kā mākslinieks izkārto attēla daļas. Kompozīcija, līnija, forma un proporcijas ir izteiksmes līdzekļi. Dominante ir tas, kas pirmais piesaista skatienu. Mākslinieks to izceļ ar lielumu, krāsu, gaismu vai novietojumu.',q:['Kas pirmais piesaista uzmanību? Kā mākslinieks to izcēlis?','Kas ir priekšplānā, vidusplānā un tālajā plānā (fonā)?','Kādas līnijas dominē: horizontālas, vertikālas, diagonālas vai loki?','Vai lielumi attēlā atbilst dzīvei, vai kaut kas ir apzināti palielināts vai samazināts?','Vai kaut kas atkārtojas un veido ritmu?','Vai kompozīcija ir simetriska vai asimetriska? Vai tā šķiet līdzsvarota?'],terms:['kompozicija','dominante','plani','ritms','lidzsvars','simetrija','horizonts'],tools:['thirds','diag','mirror','weight'],tip:'Ieslēdz rīku „Svara centrs” un ļauj skolēnam novietot marķieri tur, kur, viņaprāt, attēls būtu līdzsvarā. Pēc tam kopā salīdziniet ar rīka aprēķinu. Aprēķins nav vienīgā pareizā atbilde: tas ir vēl viens viedoklis, ko pārbaudīt. Dominante (tas, kas pirmais piesaista skatienu) ne vienmēr sakrīt ar līdzsvara punktu.',facts:['comp']},
+  {t:'Krāsa un gaisma',th:'Krāsa, gaisma un faktūra ir izteiksmes līdzekļi. Kolorīts ir darba krāsu kopējais raksturs. Gaisma un ēna veido apjomu un noskaņu. Faktūra ir virsmas raksturs, ko var sataustīt: gluda vai raupja virsma, biezi uzklāta krāsa.',q:['Vai krāsas ir siltas vai vēsas, spilgtas vai pieklusinātas?','No kurienes krīt gaisma? Kur ir gaišākā un tumšākā vieta?','Kur redzams kontrasts: gaišs pret tumšu, silts pret vēsu?','Kāda ir virsma: gluda vai raupja? Vai redzami otas triepieni?'],terms:['kolorits','silt','papildkr','piesat','tonis','gaismena','faktura'],tools:['palette','gray','tempv'],tip:'Pelēktoņu režīmā skolēni vieglāk saskata gaismu un ēnu bez krāsu ietekmes.',facts:['palette','temp','tone','sat']},
+  {t:'Sižets un noskaņa',th:'Sižets ir tas, kas notiek attēlā. Attēlojums var būt reālistisks (tuvs dzīvei) vai stilizēts (vienkāršots, pārveidots). Simbols ir tēls, kas norāda uz plašāku nozīmi.',q:['Kas notiek attēlā? Kā figūras vai priekšmeti novietoti?','Vai attēlojums ir reālistisks vai stilizēts?','Vai attēlā ir kāda zīme vai simbols? Ko tas varētu nozīmēt?','Kāda ir noskaņa? Raksturo to ar trim vārdiem.','Kādas skaņas, kustības vai sajūtas tu iztēlojies, skatoties uz šo darbu?','Ar kādiem izteiksmes līdzekļiem mākslinieks šo noskaņu radījis?'],terms:['sizets','realisms','stiliz','simbols','noskana'],tools:['gray'],tip:'Prasi pamatot ar konkrētu vietu attēlā, lai skolēns to parādītu uz tāfeles.',facts:['temp','tone']},
+  {t:'Autors un laiks',th:'Katrs mākslas darbs ir sava laika liecība. Zinot, kas, kad un kur darbu radījis, mēs labāk saprotam, ko autors gribēja pastāstīt.',q:['Kas ir autors? Kad un kurā valstī darbs radīts?','Ko darbs stāsta par tā laika cilvēku dzīvi, dabu vai kultūru?','Vai šis darbs atgādina kādu citu darbu, ko esi redzējis? Kas ir līdzīgs, kas atšķirīgs?','Vai darbā ir kaut kas, kas saistās ar Latviju vai tavu dzīvi šodien?'],terms:['konteksts','virziens','stils'],tools:[],tip:'Pastāsti īsi par autoru un laiku, bet ļauj skolēniem pašiem atrast saikni ar darbu. Jautā: „Kas attēlā par to liecina?”',facts:[],meta:true,dyn:true},
+  {t:'Mans vērtējums',th:'Vērtējums nav tikai „patīk” vai „nepatīk”. Labs vērtējums balstās uz to, ko redzi darbā.',q:['Vai darbs tev patīk? Pamato ar diviem argumentiem no attēla.','Kas darbā ir visspēcīgākais?','Kas tevi pārsteidza vai radīja jautājumus?','Ko no šī darba tu varētu izmantot savā darbā: krāsas, kompozīciju, tēmu?'],terms:['vertejums'],tools:[],tip:'Rosini atšķirt „man patīk” no „tas ir prasmīgi izdarīts”.',facts:[]}
+ ],
+ g3:[
+  {t:'Pirmā apskate',core:2,veidsSel:true,th:'Analizēt nozīmē sadalīt darbu daļās, raksturot tās un izskaidrot to savstarpējās sakarības. Nesteidzies interpretēt: vispirms nosauc faktus, ko var pārbaudīt, aplūkojot darbu.',q:['Kas ir autors? Kad un kur darbs tapa? Kāds ir nosaukums, tehnika un izmērs? Kur darbs glabājas?','Ko tu redzi pirmajā mirklī: galveno tēlu, notikumu, objektu vai noskaņu?','Kāds ir žanrs: portrets, ainava, klusā daba, sadzīves žanrs vai mitoloģiskais žanrs?'],terms:['veids','zanrs','formats','tehnika','fakts'],tools:['draw'],tip:'Vienojieties par sarunas noteikumiem: uzklausām citus, savu domu pamatojam ar to, ko redzam darbā, un kritizējam darbu, nevis cilvēku. Ja kāds sāk interpretēt, pieraksti domu un atgriezies pie tās 4. vai 5. solī.',facts:['format'],meta:true},
+  {t:'Kompozīcija un telpa',core:2,th:'Kompozīcijas izveides paņēmieni nosaka, kurp virzās skatiens. Ja kompozīcija vada skatienu pa diagonāli uz vienu figūru, tā parasti izceļ galveno tēlu vai ideju.',q:['Dominante: kas vispirms piesaista uzmanību, un ar kādiem paņēmieniem tā izcelta?','Līdzsvars: vai kompozīcija ir simetriska vai asimetriska?','Plāni: kas ir priekšplānā, vidusplānā un tālajā plānā (fonā)?','Kādi ir līniju un formu virzieni: vertikāles, horizontāles, diagonāles, loki?','Ritms: vai kādas formas, krāsas vai figūras atkārtojas?','Kontrasts: vai darbā pretstatīta gaisma un ēna, lielumi, krāsas, faktūras vai idejas?'],terms:['kompozicija','dominante','plani','ritms','kontrasts','lidzsvars','tresdalas','zelta','diagonale','linpersp','gaisapersp'],tools:['thirds','golden','diag','mirror','weight'],tip:'Režģa līnijas var pārvietot, pavelkot tās. Ļauj skolēnam pašam novietot līnijas pa galvenajām formām un pārbaudīt, vai kompozīcija atbilst trešdaļu likumam vai zelta griezumam. Telpiskam darbam izmanto vairākus skatpunktus vai fotogrāfijas no dažādām pusēm.',facts:['comp']},
+  {t:'Krāsa, gaisma, materiāls',core:2,th:'Krāsa, gaisma un materiāls ir izteiksmes līdzekļi, kas rada noskaņu. Vienmēr jautā: kāpēc mākslinieks izvēlējies tieši šo krāsu, gaismu vai materiālu, un ko tas pievieno darba emocijai vai idejai?',q:['Kolorīts: siltas vai vēsas krāsas, spilgtas vai pieklusinātas, kontrastējošas vai harmoniskas?','Kāpēc mākslinieks izvēlējies tieši šīs krāsas, gaismu un materiālu?','No kurienes krīt gaisma? Kas ir izgaismots, un kas paliek tumsā?','Faktūra un tehnika: vai virsma ir gluda vai raupja? Vai krāsa uzklāta plānās, caurspīdīgās kārtās vai biezi?','Materiāls: kas izmantots – eļļa, akvarelis, ogle, marmors, metāls vai atrasti priekšmeti?'],terms:['kolorits','silt','papildkr','harmonija','piesat','tonis','tonkontr','gaismena','faktura','triepiens','materials'],tools:['palette','gray','tempv'],tip:'Sadali klasi grupās: katra grupa analizē vienu izteiksmes līdzekli un ziņo pārējiem.',facts:['palette','temp','tone','sat']},
+  {t:'Tēli, sižets, simboli',core:2,th:'Par simboliem runā piesardzīgi: saki „balts balodis varētu simbolizēt mieru”, nevis apgalvo to kā vienīgo patiesību. Simbolu nozīme ir atkarīga no kultūras un laikmeta.',q:['Kas ir attēlots, un kādas darbības notiek?','Vai ir atpazīstami simboli, atribūti, mitoloģiski vai reliģiski motīvi? Ko tie varētu nozīmēt?','Kā figūras novietotas cita pret citu un pret skatītāju?','Vai attēlojums ir reālistisks, idealizēts vai stilizēts?','Ko varētu nozīmēt tādas detaļas kā logs, spogulis, zieds, roka vai dzīvnieks?'],terms:['sizets','motivs','simbols','atributs','realisms','idealiz','stiliz','abstrakc'],tools:['draw'],tip:'Prasi formulēt ar „varētu nozīmēt” un pamatot ar redzamo detaļu.',facts:[]},
+  {t:'Konteksts un interpretācija',core:2,th:'Interpretācija balstās uz novērojumiem un kontekstu: laikmetu, kultūru un autora biogrāfiju. Formulē autora iespējamo nolūku un attieksmi. Var būt vairākas pamatotas interpretācijas.',q:['Kādā laikā un sabiedrībā darbs radīts?','Par ko darbs runā: cilvēku, varu, dabu, mīlestību, identitāti, sabiedrību?','Vai darbs pieder kādam mākslas virzienam vai stilam? Kuras pazīmes to rāda?','Kādi varētu būt autora dzīves, sociālie vai politiskie apstākļi?','Kā darbu uztvēra autora laikabiedri? Vai tas bija populārs vai noraidīts, un kāpēc?','Kādu sabiedrībā aktuālu problēmu vai procesu darbs atspoguļo?','Salīdzini šo darbu ar kāda Latvijas mākslinieka darbu par līdzīgu tēmu. Kas kopīgs, kas atšķirīgs?'],terms:['konteksts','virziens','stils','interpr'],tools:[],tip:'Interpretācijai jābalstās uz 2.–4. soļa novērojumiem. Jautā: „Kas attēlā liek tev tā domāt?”',facts:[],meta:true,dyn:true},
+  {t:'Vērtējums',core:2,th:'Laba analīze nemeklē vienu „pareizo atbildi”, bet parāda, kā darba formas elementi rada tā nozīmi un ietekmi uz skatītāju.',q:['Vai izteiksmes līdzekļi veiksmīgi atbalsta darba ideju?','Kas darbā ir visspēcīgākais, un kas mazāk pārliecinošs?','Kādas emocijas darbs izraisa?','Vai darbs ir aktuāls šodien? Pamato.','Kā tu šo ideju vai paņēmienu pārveidotu savā darbā? Ar kādiem izteiksmes līdzekļiem?'],terms:['vertejums'],tools:[],tip:'Vērtējums ir argumentēts viedoklis, nevis „patīk” vai „nepatīk”.',facts:[]}
+ ]
+};
+
+/* virzienu sākuma gadi secībai laika līnijā (tādā pašā secībā kā STY) */
+const YEARS=[1940,1650,1920,1590,1919,330,1916,1905,1965,1905,1909,1140,1970,1860,1890,1760,1965,1915,1907,1520,1960,1880,1884,1960,1955,1886,1848,1848,1400,1730,1000,1800,1880,1924,1915,1965];
+STY.forEach((x,i)=>{x.y=YEARS[i];});
+const PERIODS=[[0,1400,'Viduslaiku māksla'],[1400,1800,'No renesanses līdz klasicismam'],[1800,1900,'19. gadsimts'],[1900,1945,'20. gadsimta pirmā puse'],[1945,3000,'20. gadsimta otrā puse un mūsdienas']];
+const VEIDI_NOS={g1:'1.–3. klase',g2:'4.–6. klase',g3:'7.–9. klase'};
+const METHOD=[['Apraksti','Kas redzams? Mākslas veids, autors, žanrs, pirmais iespaids.'],['Analizē formu','Kompozīcija, telpa, krāsa, gaisma, līnija, faktūra, tehnika.'],['Interpretē','Sižets, simboli, iespējamā ideja.'],['Ievieto kontekstā','Autors, laikmets, virziens, kultūra.'],['Novērtē','Personīgā reakcija un argumentēts spriedums.']];
+const LINKS=[
+ ['https://www.tate.org.uk/art/art-terms','Mākslas terminu vārdnīca ↗','Tate: plaša mākslas virzienu, stilu un terminu vārdnīca ar darbu piemēriem (angļu val.).'],
+ ['https://termini.gov.lv/','Terminu portāls ↗','Latvijas Nacionālais terminoloģijas portāls: apstiprinātie termini latviešu valodā.'],
+ ['https://smarthistory.org/period-culture-style/','Periodi un stili ↗','Smarthistory: mākslas vēsture pa periodiem, kultūrām un stiliem ar rakstiem un video (angļu val.).'],
+ ['https://smarthistory.org/artist/','Mākslinieki ↗','Smarthistory: mākslinieku saraksts ar rakstiem un video par viņu darbiem (angļu val.).'],
+ ['https://www.theartstory.org/artists/','Mākslinieki un viņu periodi ↗','The Art Story: mākslinieku biogrāfijas un daiļrades pārskati (angļu val.).'],
+ ['https://registri.visc.gov.lv/vispizglitiba/eksameni/dokumenti/metmat/metiet_gatavojoties_ce_kult_maksla_al.pdf','VISC metodiskais materiāls ↗','Metodiskie ieteikumi mākslas darba analīzei (PDF).']
+];
+
+/* kurā analīzes solī termins lietots */
+const USE={};
+Object.keys(STEPS).forEach(g=>STEPS[g].forEach((s,i)=>(s.terms||[]).forEach(k=>{(USE[k]=USE[k]||[]).push({g,i,t:s.t});})));
+
+const st={tab:'vardnica',cat:'all',lvl:'full',sel:'kompozicija',grade:'g2',hlStep:-1,q:''};
+const fold=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+const KEYS=Object.keys(G);
+function hay(k){const g=G[k];let t=g.t+' '+g.d+' '+(g.k||'');if(g.st)t+=' '+g.st.m+' '+g.st.lv+' '+g.st.al.join(' ')+' '+g.st.laiks;return fold(t);}
+const HAY={};KEYS.forEach(k=>HAY[k]=hay(k));
+const match=k=>{const q=fold(st.q).trim();if(!q)return true;return q.split(/\s+/).every(w=>HAY[k].includes(w));};
+const defOf=k=>{const g=G[k];return st.lvl==='kid'&&g.k?g.k:g.d;};
+const plural=(n,a,b)=>n%10===1&&n%100!==11?a:b;
+const sortLv=(a,b)=>G[a].t.localeCompare(G[b].t,'lv');
+
+function itemHTML(k,sm){const g=G[k];
+  return `<button type="button" class="item ${st.sel===k?'on':''}" data-k="${k}"><small>${esc(sm)}</small><b>${esc(g.t)}</b><span>${esc(defOf(k))}</span></button>`;}
+
+function renderSide(){
+  let h='';
+  if(st.tab==='vardnica'){
+    const base=KEYS.filter(match);
+    h+=`<div><div class="sub">Kategorijas</div><div class="cats">${[['all','Visi termini']].concat(Object.entries(CATS)).map(([c,n])=>{const cnt=c==='all'?base.length:base.filter(k=>G[k].c===c).length;return `<button type="button" class="cat ${st.cat===c?'on':''}" data-cat="${c}"><span>${esc(n)}</span><small>${cnt}</small></button>`;}).join('')}</div></div>`;
+  }else if(st.tab==='laiks'){
+    h+=`<p class="sidenote">Mākslas virzieni un stili sakārtoti pēc to rašanās laika. Noklikšķini uz virziena, lai redzētu tā pazīmes, māksliniekus un piemērus Latvijā.</p>`;
+  }else if(st.tab==='analize'){
+    h+=`<div><div class="sub">Klašu grupa</div><div class="cats">${Object.entries(VEIDI_NOS).map(([g,n])=>`<button type="button" class="cat ${st.grade===g?'on':''}" data-grade="${g}"><span>${n}</span><small>${STEPS[g].length} soļi</small></button>`).join('')}</div></div><p class="sidenote">Noklikšķini uz termina pie soļa, lai labajā pusē redzētu tā skaidrojumu.</p>`;
+  }else{
+    h+=`<p class="sidenote">Uzticami avoti padziļinātai izpētei. Saites atveras jaunā cilnē.</p><p class="sidenote"><b>Termini šajā rīkā</b> saskaņoti ar pārējiem visaskola.lv materiāliem, piemēram, faktūra ir virsmas raksturs, ko var sataustīt, bet tekstūra ir virsmas raksts, ko redz.</p>`;
+  }
+  $('#side').innerHTML=h;
+}
+
+function renderCenter(){
+  const head=$('#chead'),body=$('#cbody');
+  if(st.tab==='vardnica'){
+    const list=KEYS.filter(k=>(st.cat==='all'||G[k].c===st.cat)&&match(k)).sort(sortLv);
+    head.innerHTML=`<h2>${st.cat==='all'?'Visi termini':esc(CATS[st.cat])}</h2><span>${list.length} ${plural(list.length,'termins','termini')}</span>`;
+    body.innerHTML=list.length?`<div class="items">${list.map(k=>itemHTML(k,CATS[G[k].c])).join('')}</div>`:`<div class="noresult">Nekas netika atrasts. Pamēģini citu vārdu vai izvēlies „Visi termini”.</div>`;
+  }else if(st.tab==='laiks'){
+    const ks=KEYS.filter(k=>G[k].st&&match(k)).sort((a,b)=>G[a].st.y-G[b].st.y||sortLv(a,b));
+    head.innerHTML=`<h2>Mākslas virzieni laikā</h2><span>${ks.length} ${plural(ks.length,'virziens','virzieni')}</span>`;
+    body.innerHTML=ks.length?PERIODS.map(([a,b,n])=>{const p=ks.filter(k=>G[k].st.y>=a&&G[k].st.y<b);return p.length?`<section class="period"><h3>${n}</h3><div class="tl">${p.map(k=>itemHTML(k,G[k].st.laiks)).join('')}</div></section>`:'';}).join(''):`<div class="noresult">Nekas netika atrasts. Pamēģini citu vārdu.</div>`;
+  }else if(st.tab==='analize'){
+    const S=STEPS[st.grade];
+    head.innerHTML=`<h2>Kā analizēt mākslas darbu</h2><span>${VEIDI_NOS[st.grade]}</span>`;
+    body.innerHTML=`<div class="blk"><h3>Analīzes gaita</h3><div class="method">${METHOD.map((m,i)=>`<div class="mstep"><em>${i+1}</em><b>${m[0]}</b><span>${m[1]}</span></div>`).join('')}</div></div>
+    <div class="blk"><h3>Fakts vai spriedums</h3><div class="factjud"><div><b>Fakts</b>Kreisajā pusē ir koks.<br>Debesis ir oranžas un violetas.</div><div><b>Spriedums</b>Koks šķiet vientuļš.<br>Krāsas rada vakara noskaņu.</div></div><p class="muted" style="margin:8px 0 0">Vispirms nosauc faktus, ko var pārbaudīt, aplūkojot darbu. Laba analīze nemeklē vienu „pareizo atbildi”, bet parāda, kā izteiksmes līdzekļi rada nozīmi.</p></div>
+    <div class="blk"><h3>Analīzes soļi: ${VEIDI_NOS[st.grade]}</h3><div class="steplist">${S.map((s,i)=>`<div class="stp ${st.hlStep===i?'hl':''}" id="stp${i}"><header><em>${i+1}</em><b>${esc(s.t)}</b></header><p>${esc(s.th)}</p>${s.terms.length?`<div class="chips">${s.terms.filter(k=>G[k]).map(k=>`<button type="button" class="chip term ${st.sel===k?'on':''}" data-k="${k}">${esc(G[k].t)}</button>`).join('')}</div>`:''}</div>`).join('')}</div></div>`;
+    if(st.hlStep>=0){const el=$('#stp'+st.hlStep);if(el&&el.scrollIntoView)el.scrollIntoView({block:'center'});}
+  }else{
+    head.innerHTML=`<h2>Avoti</h2><span>${LINKS.length} saites</span>`;
+    body.innerHTML=`<div class="lcards">${LINKS.map(l=>`<a class="lcard" href="${l[0]}" target="_blank" rel="noopener"><b>${esc(l[1])}</b><span>${esc(l[2])}</span></a>`).join('')}</div>`;
+  }
+}
+
+function renderDetail(){
+  const d=$('#detail'),k=st.sel,g=G[k];
+  if(!g){d.innerHTML=`<div class="empty2"><b>Izvēlies terminu sarakstā.</b><span>Šeit parādīsies tā skaidrojums.</span></div>`;return;}
+  let h=`<div><div class="cat-lbl">${esc(CATS[g.c])}</div><h2 class="dt">${esc(g.t)}</h2></div>`;
+  if(g.st){const x=g.st;
+    h+=`<p class="dd">${esc(x.p)}</p><dl class="facts2"><dt>Laiks</dt><dd>${esc(x.laiks)}</dd><dt>Mākslinieki</dt><dd>${esc(x.m)}</dd>${x.lv?`<dt>Latvijā</dt><dd>${esc(x.lv)}</dd>`:''}</dl>${x.u?`<a class="ext" href="${TATE+x.u}" target="_blank" rel="noopener">Tate skaidrojums (angļu val.) ↗</a>`:''}`;
+  }else{
+    const kidOnly=st.lvl==='kid'&&g.k;
+    h+=`<p class="dd">${esc(kidOnly?g.k:g.d)}</p>`;
+    if(g.k&&!kidOnly)h+=`<div class="kidbox"><b>Vienkāršāk (1.–3. klasei)</b><p>${esc(g.k)}</p></div>`;
+    if(kidOnly)h+=`<div class="kidbox"><b>Pilns skaidrojums</b><p>${esc(g.d)}</p></div>`;
+  }
+  const use=USE[k];
+  if(use&&use.length)h+=`<div><div class="sub">Lietots analīzes soļos</div><div class="chips">${use.map(u=>`<button type="button" class="chip go" data-go="${u.g}:${u.i}">${GRADE_LABEL[u.g]} · ${esc(u.t)}</button>`).join('')}</div></div>`;
+  const rel=KEYS.filter(x=>x!==k&&G[x].c===g.c).sort(sortLv);
+  if(rel.length){const pick=g.st?rel.slice().sort((a,b)=>Math.abs(G[a].st.y-g.st.y)-Math.abs(G[b].st.y-g.st.y)).slice(0,6).sort((a,b)=>G[a].st.y-G[b].st.y):rel.slice(0,8);
+    if(pick.length)h+=`<div><div class="sub">${g.st?'Tuvi laikā':'Saistītie termini'}</div><div class="chips">${pick.map(x=>`<button type="button" class="chip term" data-k="${x}">${esc(G[x].t)}</button>`).join('')}</div></div>`;}
+  d.innerHTML=h;d.scrollTop=0;
+}
+
+function renderTabs(){$$('[data-tab]').forEach(b=>{const on=b.dataset.tab===st.tab;b.classList.toggle('on',on);b.setAttribute('aria-selected',on);});}
+function renderAll(){renderTabs();renderSide();renderCenter();renderDetail();}
+function select(k){if(!G[k])return;st.sel=k;$$('[data-k]').forEach(b=>b.classList.toggle('on',b.dataset.k===k));renderDetail();}
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.tab){st.tab=t.dataset.tab;st.hlStep=-1;renderAll();$('#cbody').scrollTop=0;return;}
+  if(t.dataset.cat){st.cat=t.dataset.cat;renderSide();renderCenter();$('#cbody').scrollTop=0;return;}
+  if(t.dataset.grade){st.grade=t.dataset.grade;st.hlStep=-1;renderSide();renderCenter();$('#cbody').scrollTop=0;return;}
+  if(t.dataset.lvl){st.lvl=t.dataset.lvl;$$('[data-lvl]').forEach(b=>b.classList.toggle('on',b===t));renderCenter();renderDetail();return;}
+  if(t.dataset.go){const [g,i]=t.dataset.go.split(':');st.tab='analize';st.grade=g;st.hlStep=+i;renderTabs();renderSide();renderCenter();return;}
+  if(t.dataset.k){const k=t.dataset.k;if(st.tab==='vardnica'&&!$(`.items [data-k="${k}"]`)){/* saistītais termins citā kategorijā */st.cat='all';st.q='';$('#q').value='';renderSide();renderCenter();}select(k);const it=$(`#cbody .item[data-k="${k}"]`);if(it&&it.scrollIntoView)it.scrollIntoView({block:'nearest'});return;}
+});
+$('#q').addEventListener('input',e=>{st.q=e.target.value;if(st.tab==='analize'||st.tab==='avoti'){st.tab='vardnica';renderTabs();}renderSide();renderCenter();});
+{const hb=$('#homeBtn');const home=()=>{Object.assign(st,{tab:'vardnica',cat:'all',lvl:'full',sel:'kompozicija',grade:'g2',hlStep:-1,q:''});$('#q').value='';$$('[data-lvl]').forEach(b=>b.classList.toggle('on',b.dataset.lvl==='full'));renderAll();$('#cbody').scrollTop=0;};
+ hb.addEventListener('click',home);hb.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();home();}});}
+
+/* mērogošana un pilnekrāns */
+function scaleApp(){const r=document.documentElement;if(innerWidth<=760){r.style.removeProperty('--s');return;}r.style.setProperty('--s',Math.min(innerWidth/1600,innerHeight/900));}
+window.addEventListener('resize',scaleApp);scaleApp();
+document.addEventListener('fullscreenchange',()=>{$('#fullTxt').textContent=document.fullscreenElement?'Iziet no pilnekrāna režīma':'Atvērt pilnekrāna režīmu';});
+$('#btnFull').addEventListener('click',()=>{try{if(document.fullscreenElement)document.exitFullscreen();else{const p=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();if(p&&p.catch)p.catch(()=>{});}}catch(e){}});
+
+renderAll();
+})();
+</script>
+</body>
+</html>
